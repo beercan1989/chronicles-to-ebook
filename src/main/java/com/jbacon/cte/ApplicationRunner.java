@@ -2,10 +2,13 @@ package com.jbacon.cte;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.jbacon.cte.models.ChroniclePage;
+import com.jbacon.cte.utils.WebPageUtil;
 
 /**
  * @author JBacon
@@ -18,27 +21,37 @@ public final class ApplicationRunner {
         }
 
         final ApplicationRunner applicationRunner = new ApplicationRunner();
+        applicationRunner.readChronicleGroupingPages();
         applicationRunner.findChronicleUrls();
         applicationRunner.readChroniclePages();
-        applicationRunner.processReadPage();
+        applicationRunner.processChroniclePages();
         applicationRunner.createEbook();
     }
 
-    private final Map<String, URL> chronicleGroupings = new HashMap<String, URL>();
-    private final Map<String, ChroniclePage> chroniclePages = new HashMap<String, ChroniclePage>();
+    private final Map<String, ChroniclePage> chronicleGroupings;
+    private final Map<String, List<ChroniclePage>> chroniclePages;
 
     public ApplicationRunner() throws MalformedURLException {
-        chronicleGroupings.put("PRE-LAUNCH", new URL("http://wiki.eveonline.com/en/wiki/Pre-Launch_(chronicles)"));
-        chronicleGroupings.put("2003", new URL("http://wiki.eveonline.com/en/wiki/2003_(chronicles)"));
-        chronicleGroupings.put("2004", new URL("http://wiki.eveonline.com/en/wiki/2004_(chronicles)"));
-        chronicleGroupings.put("2005", new URL("http://wiki.eveonline.com/en/wiki/2005_(chronicles)"));
-        chronicleGroupings.put("2006", new URL("http://wiki.eveonline.com/en/wiki/2006_(chronicles)"));
-        chronicleGroupings.put("2007", new URL("http://wiki.eveonline.com/en/wiki/2007_(chronicles)"));
-        chronicleGroupings.put("2008", new URL("http://wiki.eveonline.com/en/wiki/2008_(chronicles)"));
-        chronicleGroupings.put("2009", new URL("http://wiki.eveonline.com/en/wiki/2009_(chronicles)"));
-        chronicleGroupings.put("2010", new URL("http://wiki.eveonline.com/en/wiki/2010_(chronicles)"));
-        chronicleGroupings.put("2011", new URL("http://wiki.eveonline.com/en/wiki/2011_(chronicles)"));
-        chronicleGroupings.put("2012", new URL("http://wiki.eveonline.com/en/wiki/2012_(chronicles)"));
+        chronicleGroupings = new HashMap<String, ChroniclePage>();
+        chroniclePages = new HashMap<String, List<ChroniclePage>>();
+
+        setupChronicleGroupings("PRE-LAUNCH", "http://wiki.eveonline.com/en/wiki/Pre-Launch_(chronicles)");
+        setupChronicleGroupings("2003", "http://wiki.eveonline.com/en/wiki/2003_(chronicles)");
+        setupChronicleGroupings("2004", "http://wiki.eveonline.com/en/wiki/2004_(chronicles)");
+        setupChronicleGroupings("2005", "http://wiki.eveonline.com/en/wiki/2005_(chronicles)");
+        setupChronicleGroupings("2006", "http://wiki.eveonline.com/en/wiki/2006_(chronicles)");
+        setupChronicleGroupings("2007", "http://wiki.eveonline.com/en/wiki/2007_(chronicles)");
+        setupChronicleGroupings("2008", "http://wiki.eveonline.com/en/wiki/2008_(chronicles)");
+        setupChronicleGroupings("2009", "http://wiki.eveonline.com/en/wiki/2009_(chronicles)");
+        setupChronicleGroupings("2010", "http://wiki.eveonline.com/en/wiki/2010_(chronicles)");
+        setupChronicleGroupings("2011", "http://wiki.eveonline.com/en/wiki/2011_(chronicles)");
+        setupChronicleGroupings("2012", "http://wiki.eveonline.com/en/wiki/2012_(chronicles)");
+    }
+
+    private void readChronicleGroupingPages() {
+        for (final ChroniclePage page : chronicleGroupings.values()) {
+            readPageContent(page);
+        }
     }
 
     private void findChronicleUrls() {
@@ -46,14 +59,38 @@ public final class ApplicationRunner {
     }
 
     private void readChroniclePages() {
-        // TODO Auto-generated method stub
+        for (final String grouping : chronicleGroupings.keySet()) {
+            if (chroniclePages.containsKey(grouping)) {
+                for (final ChroniclePage page : chroniclePages.get(grouping)) {
+                    readPageContent(page);
+                }
+            }
+        }
     }
 
-    private void processReadPage() {
+    private void processChroniclePages() {
         // TODO Auto-generated method stub
     }
 
     private void createEbook() {
         // TODO Auto-generated method stub
+    }
+
+    private void setupChronicleGroupings(final String groupingName, final String groupingUrl)
+            throws MalformedURLException {
+        chronicleGroupings.put(groupingName, new ChroniclePage(new URL(groupingUrl)));
+        chroniclePages.put(groupingName, new ArrayList<ChroniclePage>());
+    }
+
+    private void readPageContent(final ChroniclePage page) {
+        if (page == null) {
+            return;
+        }
+
+        final URL pageUrl = page.getPageUrl();
+        if (pageUrl != null) {
+            final String webPageContent = WebPageUtil.getWebPageContent(pageUrl);
+            page.setPageContent(webPageContent);
+        }
     }
 }

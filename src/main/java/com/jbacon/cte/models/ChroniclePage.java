@@ -5,17 +5,10 @@ import java.net.URL;
 public class ChroniclePage {
     private URL pageUrl;
     private String pageContent;
-
-    public ChroniclePage() {
-    }
+    private String processedPageContent;
 
     public ChroniclePage(final URL pageUrl) {
         this.pageUrl = pageUrl;
-    }
-
-    public ChroniclePage(final URL pageUrl, final String pageContent) {
-        this.pageUrl = pageUrl;
-        this.setPageContent(pageContent);
     }
 
     public URL getPageUrl() {
@@ -26,11 +19,22 @@ public class ChroniclePage {
         return pageContent;
     }
 
-    public void setPageUrl(final URL pageUrl) {
-        this.pageUrl = pageUrl;
+    public String getProcessedPageContent() {
+        return processedPageContent;
     }
 
-    public void setPageContent(final String pageContent) {
+    public ChroniclePage setPageUrl(final URL pageUrl) {
+        this.pageUrl = pageUrl;
+        return this;
+    }
+
+    public ChroniclePage setPageContent(final String pageContent) {
         this.pageContent = pageContent;
+        return this;
+    }
+
+    public ChroniclePage setProcessedPageContent(final String processedPageContent) {
+        this.processedPageContent = processedPageContent;
+        return this;
     }
 }
