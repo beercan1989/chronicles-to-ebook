@@ -3,19 +3,34 @@ package com.jbacon.cte.models;
 import java.net.URL;
 
 public class ChroniclePage {
-    private final URL pageUrl;
-    private final String grouping;
+    private URL pageUrl;
+    private String pageContent;
 
-    public ChroniclePage(final URL pageUrl, final String grouping) {
+    public ChroniclePage() {
+    }
+
+    public ChroniclePage(final URL pageUrl) {
         this.pageUrl = pageUrl;
-        this.grouping = grouping;
+    }
+
+    public ChroniclePage(final URL pageUrl, final String pageContent) {
+        this.pageUrl = pageUrl;
+        this.setPageContent(pageContent);
     }
 
     public URL getPageUrl() {
         return pageUrl;
     }
 
-    public String getGrouping() {
-        return grouping;
+    public String getPageContent() {
+        return pageContent;
+    }
+
+    public void setPageUrl(final URL pageUrl) {
+        this.pageUrl = pageUrl;
+    }
+
+    public void setPageContent(final String pageContent) {
+        this.pageContent = pageContent;
     }
 }
