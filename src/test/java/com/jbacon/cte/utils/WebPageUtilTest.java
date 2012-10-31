@@ -14,17 +14,21 @@ import org.junit.Test;
 
 public class WebPageUtilTest {
 
+    public static final String SUCCESSFUL_PAGE_CONTENT = "<title>Pre-Launch (chronicles) - EVElopedia</title>";
+    public static final String SUCCESSFUL_TEST_URL = "http://wiki.eveonline.com/en/wiki/Pre-Launch_(chronicles)";
+
+    public static final String FAIL_TEST_URL = "http://localhost:9999";
+
     @Test
     public void shouldSuccessfullyGetPage() throws IOException {
-        final String webPageContent = WebPageUtil.getWebPageContent(new URL(
-                "http://wiki.eveonline.com/en/wiki/Pre-Launch_(chronicles)"));
+        final String webPageContent = WebPageUtil.getWebPageContent(new URL(SUCCESSFUL_TEST_URL));
 
         assertThat(webPageContent, is(not(nullValue())));
-        assertThat(webPageContent, containsString("<title>Pre-Launch (chronicles) - EVElopedia</title>"));
+        assertThat(webPageContent, containsString(SUCCESSFUL_PAGE_CONTENT));
     }
 
     public void shouldFailToGetPage() throws MalformedURLException {
-        final String webPageContent = WebPageUtil.getWebPageContent(new URL("http://localhost:9999"));
+        final String webPageContent = WebPageUtil.getWebPageContent(new URL(FAIL_TEST_URL));
 
         assertThat(webPageContent, is(nullValue()));
     }

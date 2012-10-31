@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.jbacon.annotations.VisibleForTesting;
 import com.jbacon.cte.models.ChroniclePage;
 import com.jbacon.cte.utils.WebPageUtil;
 
@@ -28,8 +29,11 @@ public final class ApplicationRunner {
         applicationRunner.createEbook();
     }
 
-    private final Map<String, ChroniclePage> chronicleGroupings;
-    private final Map<String, List<ChroniclePage>> chroniclePages;
+    @VisibleForTesting
+    final Map<String, ChroniclePage> chronicleGroupings;
+
+    @VisibleForTesting
+    final Map<String, List<ChroniclePage>> chroniclePages;
 
     public ApplicationRunner() throws MalformedURLException {
         chronicleGroupings = new HashMap<String, ChroniclePage>();
@@ -48,17 +52,22 @@ public final class ApplicationRunner {
         setupChronicleGroupings("2012", "http://wiki.eveonline.com/en/wiki/2012_(chronicles)");
     }
 
-    private void readChronicleGroupingPages() {
+    @VisibleForTesting
+    void readChronicleGroupingPages() {
         for (final ChroniclePage page : chronicleGroupings.values()) {
             readPageContent(page);
         }
     }
 
-    private void findChronicleUrls() {
-        // TODO Auto-generated method stub
+    @VisibleForTesting
+    void findChronicleUrls() {
+        for (final ChroniclePage page : chronicleGroupings.values()) {
+
+        }
     }
 
-    private void readChroniclePages() {
+    @VisibleForTesting
+    void readChroniclePages() {
         for (final String grouping : chronicleGroupings.keySet()) {
             if (chroniclePages.containsKey(grouping)) {
                 for (final ChroniclePage page : chroniclePages.get(grouping)) {
@@ -68,21 +77,24 @@ public final class ApplicationRunner {
         }
     }
 
-    private void processChroniclePages() {
+    @VisibleForTesting
+    void processChroniclePages() {
         // TODO Auto-generated method stub
     }
 
-    private void createEbook() {
+    @VisibleForTesting
+    void createEbook() {
         // TODO Auto-generated method stub
     }
 
-    private void setupChronicleGroupings(final String groupingName, final String groupingUrl)
-            throws MalformedURLException {
+    @VisibleForTesting
+    void setupChronicleGroupings(final String groupingName, final String groupingUrl) throws MalformedURLException {
         chronicleGroupings.put(groupingName, new ChroniclePage(new URL(groupingUrl)));
         chroniclePages.put(groupingName, new ArrayList<ChroniclePage>());
     }
 
-    private void readPageContent(final ChroniclePage page) {
+    @VisibleForTesting
+    void readPageContent(final ChroniclePage page) {
         if (page == null) {
             return;
         }
