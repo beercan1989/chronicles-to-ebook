@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import com.jbacon.annotations.VisibleForTesting;
 import com.jbacon.cte.models.ChroniclePage;
@@ -15,6 +16,10 @@ import com.jbacon.cte.utils.WebPageUtil;
  * @author JBacon
  */
 public final class ApplicationRunner {
+
+    private final String findChroniclesOnGroupPageRegex = "<h2>\\s*<span\\s*class=\"mw-headline\"\\s*id=\"Chronological\">\\s*Chronological\\s*</span></h2>.<ul>(?:<li>(<a href=\"[^\"]*\" title=\"[^\"]*\">[^\"]*</a>).</li>)*</ul>";
+
+    private final Pattern findChroniclesOnGroupPage = Pattern.compile(findChroniclesOnGroupPageRegex, Pattern.DOTALL);
 
     public static final void main(final String[] programParams) throws MalformedURLException {
         if (programParams.length != 0) {

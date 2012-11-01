@@ -15,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -74,10 +75,8 @@ public class ApplicationRunnerTest {
     }
 
     @Test
-    public void testRegex() throws IOException {
-        final URL preLaunchPageResource = this.getClass().getResource("/pre-launch-page.html");
-        final File preLaunchPageFile = FileUtils.toFile(preLaunchPageResource);
-        final String preLaunchPageContents = FileUtils.readFileToString(preLaunchPageFile);
+    public void testRegex01() throws IOException {
+        final String preLaunchPageContents = getResourceContents("/pre-launch-page.html");
 
         assertThat(preLaunchPageContents, is(not(nullValue())));
 
@@ -91,5 +90,32 @@ public class ApplicationRunnerTest {
 
         // Cuts down the HTML to just the Table Of Contents for the Chronological order of Chronicles.
         System.out.println(matcher.group());
+    }
+
+    @Test
+    public void testRegex02() throws IOException {
+        final String preLaunchPageContentsReduced = getResourceContents("/pre-launch-page-step1-reduced.html");
+        assertThat(preLaunchPageContentsReduced, is(not(nullValue())));
+
+        final String firstReplacement = preLaunchPageContentsReduced.replaceFirst("<h2>[^\n]*</h2>", StringUtils.EMPTY);
+        final String secondReplacement = firstReplacement.replaceAll("<[/]{0,1}(ul|li)>", StringUtils.EMPTY);
+
+        final Pattern removeEmptyLines = Pattern.compile("^$\n", Pattern.MULTILINE);
+        final String thirdReplacement = removeEmptyLines.matcher(secondReplacement).replaceAll(StringUtils.EMPTY);
+
+        final String[] contentPerLine = thirdReplacement.split("\n");
+
+        final Pattern findUrlTitleName = Pattern.compile("<a href=\"([^\"]*)\" title=\"([^\"]*)\">([^<]*)</a>");
+
+        for (final String line : contentPerLine) {
+            final Matcher matcher = findUrlTitleName.matcher(line);
+            assertThat("Page contains required content.", matcher.find());
+        }
+    }
+
+    private String getResourceContents(final String resourceName) throws IOException {
+        final URL preLaunchPageResource = this.getClass().getResource(resourceName);
+        final File preLaunchPageFile = FileUtils.toFile(preLaunchPageResource);
+        return FileUtils.readFileToString(preLaunchPageFile);
     }
 }
