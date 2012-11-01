@@ -8,6 +8,7 @@ public class ChroniclePage {
     private URL pageImageUrl;
     private File pageImage;
 
+    private String pageTitle;
     private String pageContent;
     private String processedPageContent;
 
@@ -35,28 +36,32 @@ public class ChroniclePage {
         return pageImage;
     }
 
-    public ChroniclePage setPageUrl(final URL pageUrl) {
+    public void setPageUrl(final URL pageUrl) {
         this.pageUrl = pageUrl;
-        return this;
     }
 
-    public ChroniclePage setPageContent(final String pageContent) {
+    public void setPageContent(final String pageContent) {
         this.pageContent = pageContent;
-        return this;
+
     }
 
-    public ChroniclePage setProcessedPageContent(final String processedPageContent) {
+    public void setProcessedPageContent(final String processedPageContent) {
         this.processedPageContent = processedPageContent;
-        return this;
     }
 
-    public ChroniclePage setPageImageUrl(final URL pageImageUrl) {
+    public void setPageImageUrl(final URL pageImageUrl) {
         this.pageImageUrl = pageImageUrl;
-        return this;
     }
 
-    public ChroniclePage setPageImage(final File pageImage) {
+    public void setPageImage(final File pageImage) {
         this.pageImage = pageImage;
-        return this;
+    }
+
+    public String getPageTitle() {
+        return pageTitle;
+    }
+
+    public void setPageTitle(final String pageTitle) {
+        this.pageTitle = pageTitle;
     }
 }

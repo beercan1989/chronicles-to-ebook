@@ -1,0 +1,8 @@
+<a name="chap#{chronicle index}">
+	<h4>Chapter #{padded chronicle index} - #{chronicle Title}</h4>
+	<img src="#{Chronicle Image Path/URL}" alt="Chapter #{padded chronicle index} - #{chronicle Title}" />
+</a>
+#{for paragraph in chronicle; do}
+	#{chronicle-paragraph-template.html}
+#{done}
+<mbp:pagebreak/>

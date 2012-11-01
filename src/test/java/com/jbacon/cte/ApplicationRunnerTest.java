@@ -5,18 +5,17 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.jbacon.cte.models.ChroniclePage;
@@ -25,43 +24,7 @@ import com.jbacon.cte.utils.WebPageUtilTest;
 public class ApplicationRunnerTest {
 
     @Test
-    @Ignore
-    public void testReadChronicleGroupingPages() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    @Ignore
-    public void testFindChronicleUrls() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    @Ignore
-    public void testReadChroniclePages() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    @Ignore
-    public void testProcessChroniclePages() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    @Ignore
-    public void testCreateEbook() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    @Ignore
-    public void testSetupChronicleGroupings() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testReadPageContent() throws MalformedURLException {
+    public void shouldReadPageContent() throws MalformedURLException {
         final ChroniclePage page = new ChroniclePage(new URL(WebPageUtilTest.SUCCESSFUL_TEST_URL));
 
         assertThat(page.getPageUrl(), is(not(nullValue())));
@@ -75,41 +38,31 @@ public class ApplicationRunnerTest {
     }
 
     @Test
-    public void testRegex01() throws IOException {
-        final String preLaunchPageContents = getResourceContents("/pre-launch-page.html");
+    public void shouldReadChronicleUrlsFromGroupPage() throws IOException {
+        final ChroniclePage groupPage = new ChroniclePage(new URL(WebPageUtilTest.SUCCESSFUL_TEST_URL));
+        groupPage.setPageContent(getResourceContents("/pre-launch-page.html"));
 
-        assertThat(preLaunchPageContents, is(not(nullValue())));
+        assertThat(groupPage.getPageUrl(), is(not(nullValue())));
+        assertThat(groupPage.getPageContent(), is(not(nullValue())));
 
-        final Pattern pattern = Pattern
-                .compile(
-                        "<h2>\\s*<span\\s*class=\"mw-headline\"\\s*id=\"Chronological\">\\s*Chronological\\s*</span></h2>.<ul>(?:<li>(<a href=\"[^\"]*\" title=\"[^\"]*\">[^\"]*</a>).</li>)*</ul>",
-                        Pattern.DOTALL);
-        final Matcher matcher = pattern.matcher(preLaunchPageContents);
+        final ApplicationRunner app = new ApplicationRunner();
 
-        assertThat("Page contains required content.", matcher.find());
+        final String firstGroupName = app.getChronicleGroupings().keySet().toArray(new String[0])[0];
 
-        // Cuts down the HTML to just the Table Of Contents for the Chronological order of Chronicles.
-        System.out.println(matcher.group());
-    }
+        app.readChronicleUrlsFromGroupPage(firstGroupName, groupPage);
 
-    @Test
-    public void testRegex02() throws IOException {
-        final String preLaunchPageContentsReduced = getResourceContents("/pre-launch-page-step1-reduced.html");
-        assertThat(preLaunchPageContentsReduced, is(not(nullValue())));
+        assertThat(groupPage.getPageUrl(), is(not(nullValue())));
 
-        final String firstReplacement = preLaunchPageContentsReduced.replaceFirst("<h2>[^\n]*</h2>", StringUtils.EMPTY);
-        final String secondReplacement = firstReplacement.replaceAll("<[/]{0,1}(ul|li)>", StringUtils.EMPTY);
+        final List<ChroniclePage> list = app.getChroniclePagesMap().get(firstGroupName);
 
-        final Pattern removeEmptyLines = Pattern.compile("^$\n", Pattern.MULTILINE);
-        final String thirdReplacement = removeEmptyLines.matcher(secondReplacement).replaceAll(StringUtils.EMPTY);
+        assertThat(list, is(not(nullValue())));
+        assertThat(list, is(not(empty())));
 
-        final String[] contentPerLine = thirdReplacement.split("\n");
-
-        final Pattern findUrlTitleName = Pattern.compile("<a href=\"([^\"]*)\" title=\"([^\"]*)\">([^<]*)</a>");
-
-        for (final String line : contentPerLine) {
-            final Matcher matcher = findUrlTitleName.matcher(line);
-            assertThat("Page contains required content.", matcher.find());
+        for (final ChroniclePage page : list) {
+            assertThat(page, is(not(nullValue())));
+            assertThat(page.getPageUrl(), is(not(nullValue())));
+            assertThat(page.getPageTitle(), is(not(nullValue())));
+            assertThat(page.getPageTitle(), is(not(equalTo(StringUtils.EMPTY))));
         }
     }
 
