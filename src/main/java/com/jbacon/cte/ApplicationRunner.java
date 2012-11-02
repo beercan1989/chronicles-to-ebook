@@ -1,10 +1,9 @@
 package com.jbacon.cte;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -22,16 +21,22 @@ import com.jbacon.cte.utils.WebPageUtil;
 public final class ApplicationRunner {
     public static final String BASE_URL = "http://wiki.eveonline.com";
 
+    public static final String IMAGE_FILENAME_TEMPLATE = "chapter-#{ChapterNumber}.#{FileType}";
+
     private final String findChroniclesOnGroupPageRegex = "<h2>\\s*<span\\s*class=\"mw-headline\"\\s*id=\"Chronological\">\\s*Chronological\\s*</span></h2>.<ul>(?:<li>(<a href=\"[^\"]*\" title=\"[^\"]*\">[^\"]*</a>).</li>)*</ul>";
     private final String matchH2HeaderRegex = "<h2>[^\n]*</h2>";
     private final String matchHtmlBulletPointTags = "<[/]{0,1}(ul|li)>";
     private final String matchEmptyLine = "^$\n";
     private final String matchNewLine = "\n";
     private final String matchChroniclePageUrlTitleAndName = "<a href=\"([^\"]*)\" title=\"([^\"]*)\">([^<]*)</a>";
+    private final String findChronicleContentRegex = "<!-- start content -->(.*)<!-- end content -->";
+    private final String findChronicleImageUrlRegex = "<center>.*<img[^>]*src=\"([^\"]*)\".*</center>";
 
     private final Pattern findChroniclesOnGroupPage = Pattern.compile(findChroniclesOnGroupPageRegex, Pattern.DOTALL);
     private final Pattern findChronicleUrlTitleName = Pattern.compile(matchChroniclePageUrlTitleAndName);
-    private final Pattern matchEmptyLines = Pattern.compile(matchEmptyLine, Pattern.MULTILINE);
+    private final Pattern findEmptyLines = Pattern.compile(matchEmptyLine, Pattern.MULTILINE);
+    private final Pattern findChronicleContent = Pattern.compile(findChronicleContentRegex, Pattern.DOTALL);
+    private final Pattern findChronicleImageUrl = Pattern.compile(findChronicleImageUrlRegex, Pattern.DOTALL);
 
     public static final void main(final String[] programParams) throws MalformedURLException {
         if (programParams.length != 0) {
@@ -43,15 +48,19 @@ public final class ApplicationRunner {
         applicationRunner.findChronicleUrls();
         applicationRunner.readChroniclePages();
         applicationRunner.processChroniclePages();
-        applicationRunner.createEbook();
+        // applicationRunner.createEbook();
     }
 
     private final Map<String, ChroniclePage> chronicleGroupings;
-    private final Map<String, List<ChroniclePage>> chroniclePagesMap;
+    private final Map<ChroniclePage, String> chroniclePagesMap;
+
+    private File outputfolder = new File("output/");
+    private final File imageOutputFolder = new File(outputfolder, "images/");
+    private final File ebookOutputFile = new File(outputfolder, "EveOnline-Chronicles.html");
 
     public ApplicationRunner() throws MalformedURLException {
-        chronicleGroupings = new HashMap<String, ChroniclePage>();
-        chroniclePagesMap = new HashMap<String, List<ChroniclePage>>();
+        chronicleGroupings = new LinkedHashMap<String, ChroniclePage>();
+        chroniclePagesMap = new LinkedHashMap<ChroniclePage, String>();
 
         setupChronicleGroupings("PRE-LAUNCH", BASE_URL, "/en/wiki/Pre-Launch_(chronicles)");
         setupChronicleGroupings("2003", BASE_URL, "/en/wiki/2003_(chronicles)");
@@ -79,33 +88,52 @@ public final class ApplicationRunner {
     }
 
     private void readChroniclePages() {
-        for (final String grouping : chronicleGroupings.keySet()) {
-            if (chroniclePagesMap.containsKey(grouping)) {
-                for (final ChroniclePage page : chroniclePagesMap.get(grouping)) {
-                    readPageContent(page);
-                }
-            }
+        for (final ChroniclePage page : chroniclePagesMap.keySet()) {
+            readPageContent(page);
         }
     }
 
-    private void processChroniclePages() {
-        for (final Entry<String, List<ChroniclePage>> chronicleGroup : chroniclePagesMap.entrySet()) {
-            for (final ChroniclePage page : chronicleGroup.getValue()) {
-                getChronicleImageUrl(page);
-                downloadChronicleImage(page);
-                createChronicleFromTemplate(page);
-            }
+    private void processChroniclePages() throws MalformedURLException {
+        for (final ChroniclePage page : chroniclePagesMap.keySet()) {
+            getChronicleImageUrl(page);
+            downloadChronicleImage(page);
+            // createChronicleFromTemplate(page);
         }
     }
 
-    private void createEbook() {
-        // TODO Auto-generated method stub
+    @VisibleForTesting
+    void downloadChronicleImage(final ChroniclePage page) {
+
     }
 
-    private void setupChronicleGroupings(final String groupingName, final String baseUrl, final String groupingUrl)
-            throws MalformedURLException {
-        chronicleGroupings.put(groupingName, new ChroniclePage(new URL(baseUrl + groupingUrl)));
-        chroniclePagesMap.put(groupingName, new ArrayList<ChroniclePage>());
+    @VisibleForTesting
+    void getChronicleImageUrl(final ChroniclePage page) throws MalformedURLException {
+        final String pageContent = page.getPageContent();
+        if (pageContent == null || pageContent.isEmpty()) {
+            return;
+        }
+
+        final Matcher chronicleContentMatcher = findChronicleContent.matcher(pageContent);
+        if (!chronicleContentMatcher.find()) {
+            return;
+        }
+
+        final String filteredPageContent = chronicleContentMatcher.group();
+        if (filteredPageContent == null || filteredPageContent.isEmpty()) {
+            return;
+        }
+
+        final Matcher chronicleImageUrlMatcher = findChronicleImageUrl.matcher(filteredPageContent);
+        if (!chronicleImageUrlMatcher.find()) {
+            return;
+        }
+
+        final String chroniclePageUrl = chronicleImageUrlMatcher.group(1);
+        if (chroniclePageUrl == null || chroniclePageUrl.isEmpty()) {
+            return;
+        }
+
+        page.setPageImageUrl(new URL(BASE_URL + chroniclePageUrl));
     }
 
     @VisibleForTesting
@@ -123,38 +151,28 @@ public final class ApplicationRunner {
 
     @VisibleForTesting
     void readChronicleUrlsFromGroupPage(final String groupingName, final ChroniclePage groupPage) {
-        if (!chroniclePagesMap.containsKey(groupingName)) {
-            // TODO - Print a message?
-            return;
-        }
-
         final String groupPageContents = WebPageUtil.getWebPageContent(groupPage.getPageUrl());
 
         if (groupPageContents == null || groupPageContents.isEmpty()) {
-            // TODO - Print a message?
             return;
         }
 
         final Matcher chronologicalChronicleMatcher = findChroniclesOnGroupPage.matcher(groupPageContents);
 
         if (!chronologicalChronicleMatcher.find()) {
-            // TODO - Print a message?
             return;
         }
 
         final String groupPageContentsReduced = chronologicalChronicleMatcher.group();
 
         if (groupPageContentsReduced == null || groupPageContentsReduced.isEmpty()) {
-            // TODO - Print a message?
             return;
         }
 
         final String firstReplacement = groupPageContentsReduced.replaceFirst(matchH2HeaderRegex, StringUtils.EMPTY);
         final String secondReplacement = firstReplacement.replaceAll(matchHtmlBulletPointTags, StringUtils.EMPTY);
-        final String thirdReplacement = matchEmptyLines.matcher(secondReplacement).replaceAll(StringUtils.EMPTY);
+        final String thirdReplacement = findEmptyLines.matcher(secondReplacement).replaceAll(StringUtils.EMPTY);
         final String[] contentPerLine = thirdReplacement.split(matchNewLine);
-
-        final List<ChroniclePage> chroniclePages = chroniclePagesMap.get(groupingName);
 
         for (final String line : contentPerLine) {
             final Matcher chronicleDetails = findChronicleUrlTitleName.matcher(line);
@@ -169,7 +187,7 @@ public final class ApplicationRunner {
 
                     final ChroniclePage chroniclePage = new ChroniclePage(new URL(BASE_URL + pageUrl));
                     chroniclePage.setPageTitle(pageTitle);
-                    chroniclePages.add(chroniclePage);
+                    chroniclePagesMap.put(chroniclePage, groupingName);
 
                 } catch (final MalformedURLException e) {
                 }
@@ -183,7 +201,17 @@ public final class ApplicationRunner {
     }
 
     @VisibleForTesting
-    Map<String, List<ChroniclePage>> getChroniclePagesMap() {
+    Map<ChroniclePage, String> getChroniclePagesMap() {
         return chroniclePagesMap;
+    }
+
+    @VisibleForTesting
+    void setOutputFolder(final File outputfolder) {
+        this.outputfolder = outputfolder;
+    }
+
+    private void setupChronicleGroupings(final String groupingName, final String baseUrl, final String groupingUrl)
+            throws MalformedURLException {
+        chronicleGroupings.put(groupingName, new ChroniclePage(new URL(baseUrl + groupingUrl)));
     }
 }
