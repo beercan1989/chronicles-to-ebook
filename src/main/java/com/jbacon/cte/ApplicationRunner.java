@@ -25,6 +25,14 @@ import com.jbacon.cte.utils.WebPageUtil;
  * @author JBacon
  */
 public final class ApplicationRunner {
+    private static final String TABLE_OF_CONTENTS_TEMPLATE = "table-of-contents-entry-template.html";
+    private static final String FOR_EACH_PLACER = "#\\{for Chronicle in Chronicles; do\\}";
+    private static final String CHRONICLE_PLACER = "#{chronicle-template.html}";
+    private static final String TABLE_OF_CONTENTS__PLACER = "#{table-of-contents-entry-template.html}";
+    private static final String IMAGES_FOLDER_PLACER = "#{imagesFolder}";
+    private static final String DONE_PLACER = "#\\{done\\}";
+    private static final String EBOOK_TEMPLATE = "ebook-template.html";
+    private static final String CHRONICLE_COVER_IMAGE = "/EveOnlineChroniclesCover.jpg";
     private static final String CHRONICLE_PARAGRAPHS_VI = "#\\{Chronicle Image Path/URL\\}";
     private static final String CHRONICLE_PARAGRAPHS_V = "#\\{chronicle Title\\}";
     private static final String CHRONICLE_PARAGRAPHS_IV = "#\\{padded chronicle index\\}";
@@ -69,7 +77,7 @@ public final class ApplicationRunner {
     private final Pattern findChronicleContent = Pattern.compile(findChronicleContentRegex, DOTALL);
     private final Pattern findChronicleImageUrl = Pattern.compile(findChronicleImageUrlRegex, DOTALL);
 
-    public static final void main(final String[] programParams) throws MalformedURLException {
+    public static final void main(final String[] programParams) throws IOException {
         if (programParams.length != 0) {
             System.err.println("This application does not support / require any parameters.");
         }
@@ -134,12 +142,54 @@ public final class ApplicationRunner {
         }
     }
 
-    private void createEbook() {
-        // output Cover Image
-        // get ebook template
-        // add cover image location
+    private void createEbook() throws IOException {
+        outputCoverImage();
+
         // get table of contents
+        final String tableOfContents = getTableOfContents();
+
         // get chronicle templates
+        final String chronicleContents = getChroniclesContent();
+
+        final String ebook = ResourceUtil.getString(EBOOK_TEMPLATE)
+                .replace(IMAGES_FOLDER_PLACER, imageOutputFolder.getName())
+                .replace(TABLE_OF_CONTENTS__PLACER, tableOfContents).replace(CHRONICLE_PLACER, chronicleContents)
+                .replaceAll(DONE_PLACER, EMPTY).replaceAll(FOR_EACH_PLACER, EMPTY);
+
+        FileUtils.write(ebookOutputFile, ebook, "UTF-8");
+    }
+
+    private String getChroniclesContent() {
+        final StringBuilder chronicleContents = new StringBuilder();
+
+        for (final ChroniclePage page : chroniclePagesMap.keySet()) {
+            chronicleContents.append(page.getProcessedPageContent());
+        }
+
+        return chronicleContents.toString();
+    }
+
+    private String getTableOfContents() {
+        final StringBuilder tableOfContents = new StringBuilder();
+        final String tableOfContentsTemplate = ResourceUtil.getString(TABLE_OF_CONTENTS_TEMPLATE);
+
+        int index = 1;
+        for (final ChroniclePage page : chroniclePagesMap.keySet()) {
+            tableOfContents.append(tableOfContentsTemplate.replace("#{chronicle index}", String.valueOf(index))
+                    .replace("#{Chronicle Title}", page.getPageTitle()));
+            index++;
+        }
+
+        return tableOfContents.toString();
+    }
+
+    @VisibleForTesting
+    void outputCoverImage() {
+        final File coverImage = ResourceUtil.getFile(CHRONICLE_COVER_IMAGE);
+        try {
+            FileUtils.copyFileToDirectory(coverImage, imageOutputFolder);
+        } catch (final IOException e) {
+        }
     }
 
     @VisibleForTesting
@@ -193,12 +243,12 @@ public final class ApplicationRunner {
         }
 
         final StringBuilder paragraphsProcessed = new StringBuilder();
-        final String paragraphTemplate = ResourceUtil.getResource(CHRONICLE_PARAGRAPH_TEMPLATE);
+        final String paragraphTemplate = ResourceUtil.getString(CHRONICLE_PARAGRAPH_TEMPLATE);
         for (final String paragraph : paragraphs) {
             paragraphsProcessed.append(paragraphTemplate.replace(CHRONICLE_PARAGRAPH, paragraph)).append(NEW_LINE);
         }
 
-        final String chronicleTemplate = ResourceUtil.getResource(CHRONICLE_TEMPLATE);
+        final String chronicleTemplate = ResourceUtil.getString(CHRONICLE_TEMPLATE);
         if (chronicleTemplate == null || chronicleTemplate.isEmpty()) {
             return;
         }
