@@ -117,12 +117,12 @@ public final class ChronicleParser {
         }
 
         final StringBuilder paragraphsProcessed = new StringBuilder();
-        final String paragraphTemplate = ResourceUtil.getResource(CHRONICLE_PARAGRAPH_TEMPLATE);
+        final String paragraphTemplate = ResourceUtil.getString(CHRONICLE_PARAGRAPH_TEMPLATE);
         for (final String paragraph : paragraphs) {
             paragraphsProcessed.append(paragraphTemplate.replace(CHRONICLE_PARAGRAPH, paragraph)).append(NEW_LINE);
         }
 
-        final String chronicleTemplate = ResourceUtil.getResource(CHRONICLE_TEMPLATE);
+        final String chronicleTemplate = ResourceUtil.getString(CHRONICLE_TEMPLATE);
         if (chronicleTemplate == null || chronicleTemplate.isEmpty()) {
             return;
         }

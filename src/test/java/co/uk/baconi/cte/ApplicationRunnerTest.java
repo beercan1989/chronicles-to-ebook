@@ -26,6 +26,7 @@ import co.uk.baconi.cte.utils.WebPageUtilTest;
 
 public class ApplicationRunnerTest {
 
+    private static final String EXPECTED_COVER_IMAGE_NAME = "EveOnlineChroniclesCover.jpg";
     private static final String EXPECTED_CHRONICLE_PART_III = "<img src=\"testOutputFolder/images/chapter-001.jpg\" alt=\"Chapter 001 - Fedo\" />";
     private static final String EXPECTED_CHRONICLE_PART_II = "<mbp:pagebreak/>";
     private static final String EXPECTED_CHRONICLE_PART_I = "<a name=\"chap1\">";
@@ -38,9 +39,32 @@ public class ApplicationRunnerTest {
     private static final File TEST_IMAGES_FOLDER = new File(TEST_OUTPUT_FOLDER, "images/");
 
     @Test
+    public void shouldBeAbleToOutputCoverImage() throws IOException {
+        try {
+            assertThat(TEST_IMAGES_FOLDER.exists(), is(not(true)));
+            assertThat(TEST_OUTPUT_FOLDER.exists(), is(not(true)));
+
+            final ApplicationRunner app = new ApplicationRunner();
+            app.setOutputFolder(TEST_OUTPUT_FOLDER);
+            app.outputCoverImage();
+
+            assertThat(TEST_IMAGES_FOLDER.isDirectory(), is(true));
+            final File[] imageFiles = TEST_IMAGES_FOLDER.listFiles();
+
+            assertThat(imageFiles, is(not(nullValue())));
+            assertThat(imageFiles.length, is(equalTo(1)));
+            assertThat(imageFiles[0].isFile(), is(true));
+            assertThat(imageFiles[0].getName(), is(equalTo(EXPECTED_COVER_IMAGE_NAME)));
+        } finally {
+            FileUtils.deleteDirectory(TEST_OUTPUT_FOLDER);
+            assertThat(TEST_OUTPUT_FOLDER.exists(), is(not(true)));
+        }
+    }
+
+    @Test
     public void shouldBeAbleToCreateChronicleFromTemplate() throws IOException {
         final ChroniclePage page = new ChroniclePage(null);
-        page.setPageContent(ResourceUtil.getResource(CHRONICLE_PAGE));
+        page.setPageContent(ResourceUtil.getString(CHRONICLE_PAGE));
         page.setPageImageUrl(new URL(ApplicationRunner.BASE_URL + EXPECTED_TEST_IMAGE_URL));
         page.setPageTitle("Fedo");
 
@@ -60,8 +84,6 @@ public class ApplicationRunnerTest {
         assertThat(page.getProcessedPageContent(), containsString(EXPECTED_CHRONICLE_PART_I));
         assertThat(page.getProcessedPageContent(), containsString(EXPECTED_CHRONICLE_PART_II));
         assertThat(page.getProcessedPageContent(), containsString(EXPECTED_CHRONICLE_PART_III));
-
-        System.out.println(page.getProcessedPageContent());
     }
 
     @Test
@@ -99,7 +121,7 @@ public class ApplicationRunnerTest {
     @Test
     public void shouldBeAbleToGetChronicleImageUrl() throws IOException {
         final ChroniclePage page = new ChroniclePage(null);
-        page.setPageContent(ResourceUtil.getResource(CHRONICLE_PAGE));
+        page.setPageContent(ResourceUtil.getString(CHRONICLE_PAGE));
 
         assertThat(page.getPageContent(), is(not(nullValue())));
         assertThat(page.getPageImageUrl(), is(nullValue()));
@@ -130,7 +152,7 @@ public class ApplicationRunnerTest {
     @Test
     public void shouldReadChronicleUrlsFromGroupPage() throws IOException {
         final ChroniclePage groupPage = new ChroniclePage(new URL(WebPageUtilTest.SUCCESSFUL_TEST_URL));
-        groupPage.setPageContent(ResourceUtil.getResource(CHRONICLE_GROUP_PAGE));
+        groupPage.setPageContent(ResourceUtil.getString(CHRONICLE_GROUP_PAGE));
 
         assertThat(groupPage.getPageUrl(), is(not(nullValue())));
         assertThat(groupPage.getPageContent(), is(not(nullValue())));
