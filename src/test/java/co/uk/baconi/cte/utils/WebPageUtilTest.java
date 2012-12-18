@@ -1,4 +1,4 @@
-package com.jbacon.cte.utils;
+package co.uk.baconi.cte.utils;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -11,6 +11,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.junit.Test;
+
+import co.uk.baconi.cte.utils.WebPageUtil;
 
 public class WebPageUtilTest {
 

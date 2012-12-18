@@ -1,4 +1,4 @@
-package com.jbacon.annotations;
+package co.uk.baconi.annotations;
 
 public @interface VisibleForTesting {
 }

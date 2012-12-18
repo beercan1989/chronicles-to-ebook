@@ -1,4 +1,4 @@
-package com.jbacon.cte;
+package co.uk.baconi.cte;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -20,9 +20,11 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.jbacon.cte.models.ChroniclePage;
-import com.jbacon.cte.utils.ResourceUtil;
-import com.jbacon.cte.utils.WebPageUtilTest;
+import co.uk.baconi.cte.ApplicationRunner;
+import co.uk.baconi.cte.models.ChroniclePage;
+import co.uk.baconi.cte.utils.ResourceUtil;
+import co.uk.baconi.cte.utils.WebPageUtilTest;
+
 
 public class ApplicationRunnerTest {
 

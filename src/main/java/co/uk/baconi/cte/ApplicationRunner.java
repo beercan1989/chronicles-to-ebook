@@ -1,4 +1,4 @@
-package com.jbacon.cte;
+package co.uk.baconi.cte;
 
 import static java.util.regex.Pattern.DOTALL;
 import static java.util.regex.Pattern.MULTILINE;
@@ -16,10 +16,11 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 
-import com.jbacon.annotations.VisibleForTesting;
-import com.jbacon.cte.models.ChroniclePage;
-import com.jbacon.cte.utils.ResourceUtil;
-import com.jbacon.cte.utils.WebPageUtil;
+import co.uk.baconi.annotations.VisibleForTesting;
+import co.uk.baconi.cte.models.ChroniclePage;
+import co.uk.baconi.cte.utils.ResourceUtil;
+import co.uk.baconi.cte.utils.WebPageUtil;
+
 
 /**
  * @author JBacon

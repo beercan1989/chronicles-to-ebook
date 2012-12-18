@@ -1,4 +1,4 @@
-package com.jbacon.cte.utils;
+package co.uk.baconi.cte.utils;
 
 import java.io.IOException;
 import java.net.URL;

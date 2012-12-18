@@ -1,4 +1,4 @@
-package com.jbacon.cte.models;
+package co.uk.baconi.cte.models;
 
 import java.io.File;
 import java.net.URL;
