@@ -1,14 +1,20 @@
 package co.uk.baconi.cte;
 
+import static org.apache.commons.lang.StringUtils.EMPTY;
+
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.io.FileUtils;
+
 import co.uk.baconi.annotations.VisibleForTesting;
 import co.uk.baconi.cte.models.ChroniclePage;
+import co.uk.baconi.cte.utils.ResourceUtil;
 import co.uk.baconi.cte.utils.WebPageUtil;
 
 /**
@@ -16,9 +22,19 @@ import co.uk.baconi.cte.utils.WebPageUtil;
  */
 public final class ApplicationRunner {
 
-    public static final URL BASE_URL = WebPageUtil.getUrl("http://wiki.eveonline.com");
+    @VisibleForTesting
+    static final URL BASE_URL = WebPageUtil.getUrl("http://wiki.eveonline.com");
 
-    public static final void main(final String[] programParams) throws MalformedURLException {
+    private static final String FOR_EACH_PLACER = "#\\{for Chronicle in Chronicles; do\\}";
+    private static final String CHRONICLE_PLACER = "#{chronicle-template.html}";
+    private static final String TABLE_OF_CONTENTS__PLACER = "#{table-of-contents-entry-template.html}";
+    private static final String IMAGES_FOLDER_PLACER = "#{imagesFolder}";
+    private static final String EBOOK_TEMPLATE = "ebook-template.html";
+    private static final String DONE_PLACER = "#\\{done\\}";
+    private static final String CHRONICLE_COVER_IMAGE = "/EveOnlineChroniclesCover.jpg";
+    private static final String TABLE_OF_CONTENTS_TEMPLATE = "table-of-contents-entry-template.html";
+
+    public static final void main(final String[] programParams) throws IOException {
         if (programParams.length != 0) {
             System.err.println("This application does not support / require any parameters.");
         }
@@ -63,12 +79,7 @@ public final class ApplicationRunner {
 
     private void findChronicleUrls() {
         for (final Entry<String, ChroniclePage> group : chronicleGroupings.entrySet()) {
-            final Entry<ChroniclePage, String> result = ChronicleParser.readChronicleUrlsFromGroupPage(group.getKey(),
-                    group.getValue(), BASE_URL);
-
-            if (result != null) {
-                chroniclePagesMap.put(result.getKey(), result.getValue());
-            }
+            ChronicleParser.readChronicleUrlsFromGroupPage(group.getKey(), group.getValue(), BASE_URL);
         }
     }
 
@@ -88,12 +99,54 @@ public final class ApplicationRunner {
         }
     }
 
-    private void createEbook() {
-        // output Cover Image
-        // get ebook template
-        // add cover image location
+    private void createEbook() throws IOException {
+        outputCoverImage();
+
         // get table of contents
+        final String tableOfContents = getTableOfContents();
+
         // get chronicle templates
+        final String chronicleContents = getChroniclesContent();
+
+        final String ebook = ResourceUtil.getString(EBOOK_TEMPLATE)
+                .replace(IMAGES_FOLDER_PLACER, imageOutputFolder.getName())
+                .replace(TABLE_OF_CONTENTS__PLACER, tableOfContents).replace(CHRONICLE_PLACER, chronicleContents)
+                .replaceAll(DONE_PLACER, EMPTY).replaceAll(FOR_EACH_PLACER, EMPTY);
+
+        FileUtils.write(ebookOutputFile, ebook, "UTF-8");
+    }
+
+    private String getChroniclesContent() {
+        final StringBuilder chronicleContents = new StringBuilder();
+
+        for (final ChroniclePage page : chroniclePagesMap.keySet()) {
+            chronicleContents.append(page.getProcessedPageContent());
+        }
+
+        return chronicleContents.toString();
+    }
+
+    private String getTableOfContents() {
+        final StringBuilder tableOfContents = new StringBuilder();
+        final String tableOfContentsTemplate = ResourceUtil.getString(TABLE_OF_CONTENTS_TEMPLATE);
+
+        int index = 1;
+        for (final ChroniclePage page : chroniclePagesMap.keySet()) {
+            tableOfContents.append(tableOfContentsTemplate.replace("#{chronicle index}", String.valueOf(index))
+                    .replace("#{Chronicle Title}", page.getPageTitle()));
+            index++;
+        }
+
+        return tableOfContents.toString();
+    }
+
+    @VisibleForTesting
+    void outputCoverImage() {
+        final File coverImage = ResourceUtil.getFile(CHRONICLE_COVER_IMAGE);
+        try {
+            FileUtils.copyFileToDirectory(coverImage, imageOutputFolder);
+        } catch (final IOException e) {
+        }
     }
 
     @VisibleForTesting

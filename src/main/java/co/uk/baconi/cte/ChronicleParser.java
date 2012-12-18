@@ -52,6 +52,7 @@ public final class ChronicleParser {
     private static final String findChronicleImageUrlRegex = "<center>.*<img[^>]*src=\"([^\"]*)\".*</center>";
     private static final String findChroniclesOnGroupPageRegex = "<h2>\\s*<span\\s*class=\"mw-headline\"\\s*id=\"Chronological\">\\s*Chronological\\s*</span></h2>.<ul>(?:<li>(<a href=\"[^\"]*\" title=\"[^\"]*\">[^\"]*</a>).</li>)*</ul>";
 
+
     private static final String matchH2HeaderRegex = "<h2>[^\n]*</h2>";
     private static final String matchHtmlBulletPointTags = "<[/]{0,1}(ul|li)>";
     private static final String matchEmptyLine = "^$\n";
