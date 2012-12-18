@@ -18,7 +18,7 @@ import co.uk.baconi.cte.models.ChroniclePage;
 import co.uk.baconi.cte.utils.ResourceUtil;
 import co.uk.baconi.cte.utils.WebPageUtil;
 
-public final class ChronicleParser {
+public final class ChronicleRegexParser {
     private static final String NEW_LINE = "\n";
 
     private static final String CHRONICLE_PARAGRAPHS_I = "#{for paragraph in chronicle; do}";
@@ -65,7 +65,7 @@ public final class ChronicleParser {
     private static final Pattern findChronicleUrlTitleName = Pattern.compile(matchChroniclePageUrlTitleAndName);
     private static final Pattern findEmptyLines = Pattern.compile(matchEmptyLine, MULTILINE);
 
-    private ChronicleParser() {
+    private ChronicleRegexParser() {
     }
 
     public static void createChronicleFromTemplate(final ChroniclePage page, final int chronicleIndex) {

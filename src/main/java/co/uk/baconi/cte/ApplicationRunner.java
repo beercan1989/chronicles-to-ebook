@@ -79,7 +79,7 @@ public final class ApplicationRunner {
 
     private void findChronicleUrls() {
         for (final Entry<String, ChroniclePage> group : chronicleGroupings.entrySet()) {
-            ChronicleParser.readChronicleUrlsFromGroupPage(group.getKey(), group.getValue(), BASE_URL);
+            ChronicleRegexParser.readChronicleUrlsFromGroupPage(group.getKey(), group.getValue(), BASE_URL);
         }
     }
 
@@ -92,9 +92,9 @@ public final class ApplicationRunner {
     private void processChroniclePages() throws MalformedURLException {
         int index = 1;
         for (final ChroniclePage page : chroniclePagesMap.keySet()) {
-            ChronicleParser.getChronicleImageUrl(page, BASE_URL);
-            ChronicleParser.downloadChronicleImage(page, index, imageOutputFolder);
-            ChronicleParser.createChronicleFromTemplate(page, index);
+            ChronicleRegexParser.getChronicleImageUrl(page, BASE_URL);
+            ChronicleRegexParser.downloadChronicleImage(page, index, imageOutputFolder);
+            ChronicleRegexParser.createChronicleFromTemplate(page, index);
             index++;
         }
     }

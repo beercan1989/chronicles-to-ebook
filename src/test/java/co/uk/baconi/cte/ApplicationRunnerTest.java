@@ -76,7 +76,7 @@ public class ApplicationRunnerTest {
         assertThat(page.getPageContent(), is(not(nullValue())));
         assertThat(page.getProcessedPageContent(), is(nullValue()));
 
-        ChronicleParser.createChronicleFromTemplate(page, 1);
+        ChronicleRegexParser.createChronicleFromTemplate(page, 1);
 
         assertThat(page.getPageImageUrl(), is(not(nullValue())));
         assertThat(page.getPageContent(), is(not(nullValue())));
@@ -100,7 +100,7 @@ public class ApplicationRunnerTest {
         assertThat(page.getPageUrl(), is(nullValue()));
 
         try {
-            ChronicleParser.downloadChronicleImage(page, 1, TEST_OUTPUT_FOLDER);
+            ChronicleRegexParser.downloadChronicleImage(page, 1, TEST_OUTPUT_FOLDER);
 
             assertThat(TEST_OUTPUT_FOLDER.isDirectory(), is(true));
             TEST_IMAGES_FOLDER.mkdir();
@@ -126,7 +126,7 @@ public class ApplicationRunnerTest {
         assertThat(page.getPageContent(), is(not(nullValue())));
         assertThat(page.getPageImageUrl(), is(nullValue()));
 
-        ChronicleParser.getChronicleImageUrl(page, ApplicationRunner.BASE_URL);
+        ChronicleRegexParser.getChronicleImageUrl(page, ApplicationRunner.BASE_URL);
 
         assertThat(page.getPageContent(), is(not(nullValue())));
         assertThat(page.getPageImageUrl(), is(not(nullValue())));
@@ -161,7 +161,7 @@ public class ApplicationRunnerTest {
 
         final String firstGroupName = app.getChronicleGroupings().keySet().toArray(new String[0])[0];
 
-        ChronicleParser.readChronicleUrlsFromGroupPage(firstGroupName, groupPage, ApplicationRunner.BASE_URL);
+        ChronicleRegexParser.readChronicleUrlsFromGroupPage(firstGroupName, groupPage, ApplicationRunner.BASE_URL);
 
         assertThat(groupPage.getPageUrl(), is(not(nullValue())));
 
