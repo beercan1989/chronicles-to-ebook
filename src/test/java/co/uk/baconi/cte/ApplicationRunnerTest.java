@@ -20,11 +20,9 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import co.uk.baconi.cte.ApplicationRunner;
 import co.uk.baconi.cte.models.ChroniclePage;
 import co.uk.baconi.cte.utils.ResourceUtil;
 import co.uk.baconi.cte.utils.WebPageUtilTest;
-
 
 public class ApplicationRunnerTest {
 
@@ -54,7 +52,7 @@ public class ApplicationRunnerTest {
         assertThat(page.getPageContent(), is(not(nullValue())));
         assertThat(page.getProcessedPageContent(), is(nullValue()));
 
-        new ApplicationRunner().createChronicleFromTemplate(page, 1);
+        ChronicleParser.createChronicleFromTemplate(page, 1);
 
         assertThat(page.getPageImageUrl(), is(not(nullValue())));
         assertThat(page.getPageContent(), is(not(nullValue())));
@@ -80,9 +78,7 @@ public class ApplicationRunnerTest {
         assertThat(page.getPageUrl(), is(nullValue()));
 
         try {
-            final ApplicationRunner app = new ApplicationRunner();
-            app.setOutputFolder(TEST_OUTPUT_FOLDER);
-            app.downloadChronicleImage(page, 1);
+            ChronicleParser.downloadChronicleImage(page, 1, TEST_OUTPUT_FOLDER);
 
             assertThat(TEST_OUTPUT_FOLDER.isDirectory(), is(true));
             TEST_IMAGES_FOLDER.mkdir();
@@ -108,7 +104,7 @@ public class ApplicationRunnerTest {
         assertThat(page.getPageContent(), is(not(nullValue())));
         assertThat(page.getPageImageUrl(), is(nullValue()));
 
-        new ApplicationRunner().getChronicleImageUrl(page);
+        ChronicleParser.getChronicleImageUrl(page, ApplicationRunner.BASE_URL);
 
         assertThat(page.getPageContent(), is(not(nullValue())));
         assertThat(page.getPageImageUrl(), is(not(nullValue())));
@@ -143,7 +139,7 @@ public class ApplicationRunnerTest {
 
         final String firstGroupName = app.getChronicleGroupings().keySet().toArray(new String[0])[0];
 
-        app.readChronicleUrlsFromGroupPage(firstGroupName, groupPage);
+        ChronicleParser.readChronicleUrlsFromGroupPage(firstGroupName, groupPage, ApplicationRunner.BASE_URL);
 
         assertThat(groupPage.getPageUrl(), is(not(nullValue())));
 
