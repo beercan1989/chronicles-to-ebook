@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html> 
+	<head>
+		<title>Eve Online Chronicles</title>
+		<style type="text/css">
+			img { display: block; margin-left: auto; margin-right: auto }
+			h1,h2,h3,h4 { text-align: center }
+		</style>
+	</head> 
+	<body>
+		<div class="Start">
+			<a id="start"></a>
+			<h2>Eve Online Chronicles</h2>
+			<img src="#{imagesFolder}/EveOnlineChroniclesCover.jpg" alt="Cover" />
+			<p>Content copyright © CCP hf. All rights reserved</p> 
+			<mbp:pagebreak/>
+		</div>
+		
+		<div class="TableOfConents">
+			<a id="TOC"></a>
+			<h3>Table of Contents</h3>
+			#{for Chronicle in Chronicles; do}
+				#{table-of-contents-entry-template.html}
+			#{done}
+			<mbp:pagebreak/>
+		</div>
+		
+		<div class="BookBody">
+			#{for Chronicle in Chronicles; do}
+				#{chronicle-template.html}
+			#{done}
+		</div>
+	</body>
+</html>

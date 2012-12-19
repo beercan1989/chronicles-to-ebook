@@ -3,6 +3,8 @@ package co.uk.baconi.cte.models;
 import java.io.File;
 import java.net.URL;
 
+import org.jsoup.nodes.Element;
+
 public class ChroniclePage {
     private URL pageUrl;
     private URL pageImageUrl;
@@ -10,7 +12,7 @@ public class ChroniclePage {
 
     private String pageTitle;
     private String pageContent;
-    private String processedPageContent;
+    private Element processedPageContent;
 
     public ChroniclePage(final URL pageUrl) {
         this.pageUrl = pageUrl;
@@ -24,7 +26,7 @@ public class ChroniclePage {
         return pageContent;
     }
 
-    public String getProcessedPageContent() {
+    public Element getProcessedPageContent() {
         return processedPageContent;
     }
 
@@ -45,7 +47,7 @@ public class ChroniclePage {
 
     }
 
-    public void setProcessedPageContent(final String processedPageContent) {
+    public void setProcessedPageContent(final Element processedPageContent) {
         this.processedPageContent = processedPageContent;
     }
 

@@ -1,0 +1,11 @@
+<div class="Chronicle">
+	<a id="chap#{chronicle index}"></a>
+	<h4>Chapter #{padded chronicle index} - #{chronicle Title}</h4>
+	<img src="#{imagesFolder}/#{chronicleImageName}" alt="Chapter #{paddedChronicleIndex} - #{chronicleTitle}" />
+	<div class="ChronicleBody">
+		#{for paragraph in chronicle; do}
+			#{chronicle-paragraph-template.html}
+		#{done}
+	</div>
+	<mbp:pagebreak/>
+</div>
