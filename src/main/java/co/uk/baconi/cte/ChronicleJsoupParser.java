@@ -1,7 +1,9 @@
 package co.uk.baconi.cte;
 
+import java.io.File;
 import java.net.URL;
 
+import org.apache.commons.io.FileUtils;
 import org.jsoup.helper.HttpConnection;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -11,14 +13,16 @@ public final class ChronicleJsoupParser {
     private ChronicleJsoupParser() {
     }
 
-    // http://jsoup.org/cookbook/extracting-data/dom-navigation
-    // http://jsoup.org/cookbook/extracting-data/selector-syntax
-    // http://jsoup.org/cookbook/extracting-data/attributes-text-html
-
-    public static void parseChroniclePage(final Document ebook, final URL chronicleUrl) {
+    /**
+     * Downloads a chronicle page, parses it and add's it to the ebook document.
+     * Along with downloading the chronicle image and the chronicles source code to a file.
+     */
+    public static void parseChroniclePage(final Document ebook, final URL chronicleUrl, final File imageOutputFolder,
+            final File dumpingFolder) {
         try {
             // Download chronicle page from the wiki.
             final Document downloadedChronicle = HttpConnection.connect(chronicleUrl).get();
+            FileUtils.write(dumpingFolder, downloadedChronicle.toString(), "UTF-8");
 
             // Parse chronicle page
             // - Get chronicle title.
@@ -31,29 +35,44 @@ public final class ChronicleJsoupParser {
             // Calculate chronicle index
             final int chronicleIndex = ebook.select("div.Chronicle").size() + 1;
 
+            // Download chronicle image
+            // - Get image url
+            // - Download to image output folder
+            // - Update image element to point at image folder
+            final URL imageUrl = new URL(downloadedChronicle.baseUri() + chronicleImage.attr("src"));
+            final File imageDestination = new File(imageOutputFolder, getImageFileName(imageUrl));
+            FileUtils.copyURLToFile(imageUrl, imageDestination);
+            chronicleImage.attr("src", imageOutputFolder.getName() + "/" + imageDestination.getName());
+
             // Build chronicle entry
             // - Add bookmark point.
             // - Add chronicle title.
             // - Add chronicle image.
             // - Add chronicle paragraphs.
             // - Add amazon page break.
-            final Element chronicleEntry = ebook.createElement("div").attr("class", "Chronicle");
-            chronicleEntry.appendElement("a").attr("id", "chap" + chronicleIndex);
+            final Element chronicleEntry = ebook.select("div.BookBody").first().appendElement("div");
+            chronicleEntry.attr("class", "Chronicle");
+            chronicleEntry.appendElement("a").attr("id", "chap-" + chronicleIndex);
             chronicleEntry.appendElement("h4").text("Chapter " + padded(chronicleIndex) + " - " + chronicleTitle);
             chronicleEntry.appendChild(chronicleImage);
             appendChildren(chronicleEntry.appendElement("div").attr("class", "ChronicleBody"), chronicleParagraphs);
             chronicleEntry.append("<mbp:pagebreak/>");
 
             // Build TOC entry
+            // - Create toc entry
+            // - Add to correct place in TOC area
+            final Element tocEntry = ebook.createElement("a").attr("href", "#chap-" + chronicleIndex);
+            tocEntry.appendElement("h4").text(chronicleTitle);
+            ebook.select("div.TableOfConents").first().children().last().before(tocEntry);
 
-            // Add chronicle content to ebook.
-            // - Create TOC entry
-            // - Add content to BookBody
         } catch (final Throwable t) {
             t.printStackTrace();
         }
     }
 
+    /**
+     * Appends all the given children to the parent Element.
+     */
     private static Element appendChildren(final Element parent, final Elements children) {
         for (final Element paragraph : children) {
             parent.appendChild(paragraph);
@@ -76,5 +95,19 @@ public final class ChronicleJsoupParser {
             element.text(element.text());
         }
         return elements;
+    }
+
+    /**
+     * Finds the name from the URL for an image.
+     */
+    private static String getImageFileName(final URL imageUrl) {
+        return last(imageUrl.toString().split("/"));
+    }
+
+    /**
+     * Get the last element in the array
+     */
+    private static <T> T last(final T[] array) {
+        return (array == null || array.length < 0) ? null : array[array.length - 1];
     }
 }
