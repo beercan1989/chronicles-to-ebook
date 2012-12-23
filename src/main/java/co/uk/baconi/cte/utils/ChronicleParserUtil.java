@@ -1,15 +1,52 @@
 package co.uk.baconi.cte.utils;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.commons.io.FileUtils;
+import org.jsoup.helper.HttpConnection;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 
 public final class ChronicleParserUtil {
     private ChronicleParserUtil() {
+    }
+
+    public static List<URL> getChroniclePages(final URL chronicleCollectionPage, final File collectionDownloadFolder)
+            throws IOException {
+        final List<URL> chroniclePages = new ArrayList<URL>();
+
+        final Document chronicleCollection = downloadChroniclePageFromWiki(chronicleCollectionPage,
+                collectionDownloadFolder);
+
+        final Element chronicleList = chronicleCollection.select("#Chronological").first().parent()
+                .nextElementSibling();
+
+        final Elements chronicleLinks = chronicleList.select("a");
+        final String baseUrl = getBaseUrl(chronicleCollection);
+
+        for (final Element chronicleLink : chronicleLinks) {
+            final String chronicleUrl = chronicleLink.attr("href");
+            chroniclePages.add(new URL(baseUrl + chronicleUrl));
+        }
+
+        return chroniclePages;
+    }
+
+    /**
+     * Download the chronicle page from the wiki.
+     */
+    public static Document downloadChroniclePageFromWiki(final URL chronicleUrl, final File chronicleDownloadFolder)
+            throws IOException {
+        final Document downloadedChronicle = HttpConnection.connect(chronicleUrl).get();
+        FileUtils.write(chronicleDownloadFolder, downloadedChronicle.toString(), "UTF-8");
+        return downloadedChronicle;
     }
 
     /**
@@ -59,7 +96,7 @@ public final class ChronicleParserUtil {
     public static URL getDownloadableImageUrl(final Document chronicle, final Element image)
             throws MalformedURLException {
         final URL baseUrl = new URL(chronicle.baseUri());
-        return new URL(baseUrl.getProtocol() + "://" + baseUrl.getHost() + image.attr("src"));
+        return new URL(getBaseUrl(chronicle) + image.attr("src"));
     }
 
     /**
@@ -93,5 +130,10 @@ public final class ChronicleParserUtil {
         ebook.body().appendElement("div").attr("class", "BookBody");
 
         return ebook;
+    }
+
+    private static String getBaseUrl(final Node node) throws MalformedURLException {
+        final URL baseUrl = new URL(node.baseUri());
+        return baseUrl.getProtocol() + "://" + baseUrl.getHost();
     }
 }

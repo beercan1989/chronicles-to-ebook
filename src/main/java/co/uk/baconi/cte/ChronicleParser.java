@@ -2,6 +2,7 @@ package co.uk.baconi.cte;
 
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.appendChildren;
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.cleanInnerHtml;
+import static co.uk.baconi.cte.utils.ChronicleParserUtil.downloadChroniclePageFromWiki;
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.getDownloadableImageUrl;
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.getImageFileName;
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.padded;
@@ -11,7 +12,6 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
-import org.jsoup.helper.HttpConnection;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -147,14 +147,4 @@ public final class ChronicleParser {
         return downloadedChronicle.select("h1.header").first().text();
     }
 
-    /**
-     * Download the chronicle page from the wiki.
-     */
-    @VisibleForTesting
-    static Document downloadChroniclePageFromWiki(final URL chronicleUrl, final File chronicleDownloadFolder)
-            throws IOException {
-        final Document downloadedChronicle = HttpConnection.connect(chronicleUrl).get();
-        FileUtils.write(chronicleDownloadFolder, downloadedChronicle.toString(), "UTF-8");
-        return downloadedChronicle;
-    }
 }

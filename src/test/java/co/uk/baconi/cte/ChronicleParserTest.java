@@ -4,7 +4,6 @@ import static co.uk.baconi.cte.ChronicleParser.buildChronicleBodyEntry;
 import static co.uk.baconi.cte.ChronicleParser.buildTableOfContentsEntry;
 import static co.uk.baconi.cte.ChronicleParser.calculateCurrentChronicleIndex;
 import static co.uk.baconi.cte.ChronicleParser.downloadChronicleImage;
-import static co.uk.baconi.cte.ChronicleParser.downloadChroniclePageFromWiki;
 import static co.uk.baconi.cte.ChronicleParser.getChronicleImageDetails;
 import static co.uk.baconi.cte.ChronicleParser.getChronicleParagraphs;
 import static co.uk.baconi.cte.ChronicleParser.getChronicleTitle;
@@ -29,7 +28,6 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
@@ -174,18 +172,6 @@ public class ChronicleParserTest {
         final String chronicleTitle = getChronicleTitle(downloadedChronicle);
         assertThat(chronicleTitle, is(not(nullValue())));
         assertThat(chronicleTitle, is(equalToIgnoringCase("Fedo (Chronicle)")));
-    }
-
-    @Test
-    public void shouldBeAbleToDownloadChroniclePageFromWiki() throws IOException {
-        final URL chronicleUrl = new URL("http://wiki.eveonline.com/en/wiki/Fedo_(Chronicle)");
-        final File chronicleDownloadFolder = new File(TEST_OUTPUT_FOLDER, "chronicleDownloads");
-
-        final Document result = downloadChroniclePageFromWiki(chronicleUrl, chronicleDownloadFolder);
-
-        assertThat(result, is(not(nullValue())));
-        assertThat(result.hasText(), is(true));
-        assertThat(result.text(), containsString("Fedo"));
     }
 
     @After
