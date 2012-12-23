@@ -1,14 +1,14 @@
 package co.uk.baconi.cte;
 
-import static co.uk.baconi.cte.ChronicleJsoupParser.buildChronicleBodyEntry;
-import static co.uk.baconi.cte.ChronicleJsoupParser.buildTableOfContentsEntry;
-import static co.uk.baconi.cte.ChronicleJsoupParser.calculateCurrentChronicleIndex;
-import static co.uk.baconi.cte.ChronicleJsoupParser.downloadChronicleImage;
-import static co.uk.baconi.cte.ChronicleJsoupParser.downloadChroniclePageFromWiki;
-import static co.uk.baconi.cte.ChronicleJsoupParser.getChronicleImageDetails;
-import static co.uk.baconi.cte.ChronicleJsoupParser.getChronicleParagraphs;
-import static co.uk.baconi.cte.ChronicleJsoupParser.getChronicleTitle;
-import static co.uk.baconi.cte.ChronicleJsoupParser.updateChronicleImageElement;
+import static co.uk.baconi.cte.ChronicleParser.buildChronicleBodyEntry;
+import static co.uk.baconi.cte.ChronicleParser.buildTableOfContentsEntry;
+import static co.uk.baconi.cte.ChronicleParser.calculateCurrentChronicleIndex;
+import static co.uk.baconi.cte.ChronicleParser.downloadChronicleImage;
+import static co.uk.baconi.cte.ChronicleParser.downloadChroniclePageFromWiki;
+import static co.uk.baconi.cte.ChronicleParser.getChronicleImageDetails;
+import static co.uk.baconi.cte.ChronicleParser.getChronicleParagraphs;
+import static co.uk.baconi.cte.ChronicleParser.getChronicleTitle;
+import static co.uk.baconi.cte.ChronicleParser.updateChronicleImageElement;
 import static co.uk.baconi.matchers.Are.are;
 import static co.uk.baconi.matchers.Does.does;
 import static co.uk.baconi.matchers.FileMatchers.exists;
@@ -43,7 +43,7 @@ import org.junit.Test;
 import co.uk.baconi.cte.utils.ChronicleParserUtil;
 import co.uk.baconi.cte.utils.ResourceUtil;
 
-public class ChronicleJsoupParserTest {
+public class ChronicleParserTest {
 
     private static final File TEST_OUTPUT_FOLDER = new File("test-output-folder");
     private static final String TEST_CHRONICLE_PAGE = "/fedo-chronicle-page.html";

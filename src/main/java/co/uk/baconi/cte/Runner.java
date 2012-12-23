@@ -15,7 +15,7 @@ import co.uk.baconi.cte.utils.WebPageUtil;
 /**
  * @author JBacon
  */
-public final class ChroniclesToEbookRunner {
+public final class Runner {
 
     private static final URL BASE_URL = WebPageUtil.getUrl("http://wiki.eveonline.com");
 
@@ -24,7 +24,7 @@ public final class ChroniclesToEbookRunner {
             System.err.println("This application does not support / require any parameters.");
         }
 
-        new ChroniclesToEbookRunner().run();
+        new Runner().run();
     }
 
     private final LinkedHashMap<String, ChroniclePage> chronicleGroupings;
@@ -35,7 +35,7 @@ public final class ChroniclesToEbookRunner {
     private final File chronicleDownloadFolder = new File(outputfolder, "chronicles-downloaded/");
     private final File ebookOutputFile = new File(outputfolder, "EveOnline-Chronicles.html");
 
-    public ChroniclesToEbookRunner() throws MalformedURLException {
+    public Runner() throws MalformedURLException {
         chronicleGroupings = new LinkedHashMap<String, ChroniclePage>();
         chroniclePagesMap = new LinkedHashMap<ChroniclePage, String>();
 

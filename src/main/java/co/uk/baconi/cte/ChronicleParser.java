@@ -18,9 +18,9 @@ import org.jsoup.select.Elements;
 
 import co.uk.baconi.annotations.VisibleForTesting;
 
-public final class ChronicleJsoupParser {
+public final class ChronicleParser {
 
-    private ChronicleJsoupParser() {
+    private ChronicleParser() {
     }
 
     /**
