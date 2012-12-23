@@ -2,6 +2,7 @@ package co.uk.baconi.cte;
 
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.appendChildren;
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.cleanInnerHtml;
+import static co.uk.baconi.cte.utils.ChronicleParserUtil.getDownloadableImageUrl;
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.getImageFileName;
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.padded;
 
@@ -90,7 +91,7 @@ public final class ChronicleJsoupParser {
         chronicleEntry.appendElement("h4").text("Chapter " + padded(chronicleIndex) + " - " + chronicleTitle);
         chronicleEntry.appendChild(chronicleImage);
         appendChildren(chronicleEntry.appendElement("div").attr("class", "ChronicleBody"), chronicleParagraphs);
-        chronicleEntry.append("<mbp:pagebreak/>");
+        chronicleEntry.append("<mbp:pagebreak />");
     }
 
     /**
@@ -108,7 +109,7 @@ public final class ChronicleJsoupParser {
     @VisibleForTesting
     static File downloadChronicleImage(final Document downloadedChronicle, final Element chronicleImage,
             final File imageOutputFolder) throws IOException {
-        final URL imageUrl = new URL(downloadedChronicle.baseUri() + chronicleImage.attr("src"));
+        final URL imageUrl = getDownloadableImageUrl(downloadedChronicle, chronicleImage);
         final File imageDestination = new File(imageOutputFolder, getImageFileName(imageUrl));
         FileUtils.copyURLToFile(imageUrl, imageDestination);
         return imageDestination;
