@@ -1,89 +1,122 @@
 package co.uk.baconi.cte;
 
-//import static org.hamcrest.CoreMatchers.is;
-//import static org.hamcrest.CoreMatchers.not;
-//import static org.hamcrest.CoreMatchers.nullValue;
-//import static org.hamcrest.Matchers.containsString;
-//import static org.hamcrest.Matchers.empty;
-//import static org.hamcrest.Matchers.equalTo;
-//import static org.junit.Assert.assertThat;
+import static co.uk.baconi.cte.ChronicleJsoupParser.downloadChroniclePageFromWiki;
+import static co.uk.baconi.cte.ChronicleJsoupParser.getChronicleParagraphs;
+import static co.uk.baconi.cte.ChronicleJsoupParser.getChronicleTitle;
+import static co.uk.baconi.matchers.Are.are;
+import static co.uk.baconi.matchers.Does.does;
+import static co.uk.baconi.matchers.FileMatchers.exists;
+import static co.uk.baconi.matchers.FileMatchers.isDirectory;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
+import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
+import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
-//import java.io.File;
-//import java.io.IOException;
-//import java.net.MalformedURLException;
-//import java.net.URL;
-//import java.util.Arrays;
-//import java.util.Set;
-//
-//import org.apache.commons.io.FileUtils;
-//import org.apache.commons.lang.StringUtils;
-//import org.junit.Test;
-//import org.mockito.Mockito;
+import co.uk.baconi.cte.utils.ResourceUtil;
 
 public class ChronicleJsoupParserTest {
-    @Test
-    public void test() throws IOException {
-        final Document doc = Jsoup.connect("http://wiki.eveonline.com/en/wiki/Fedo_(Chronicle)").get();
-        final String chronicleTitle = doc.select("h1.header").first().text();
-        final Elements chronicleBody = doc.select("div#bodyContent p");
-        final Element pageImage = doc.select("a.image img").first();
 
-        for (final Element element : chronicleBody) {
-            element.text(element.text());
-        }
+    private static final File TEST_OUTPUT_FOLDER = new File("test-output-folder");
+    private static final String TEST_CHRONICLE_PAGE = "/fedo-chronicle-page.html";
 
-        System.out.println(chronicleTitle);
-        System.out.println(pageImage.attr("src"));
-        System.out.println(chronicleBody);
-        // for (final Element element : chronicleBody) {
-        // System.out.println(element.text());
-        // }
+    @Before
+    public void before() {
+        TEST_OUTPUT_FOLDER.mkdir();
+
+        assertThat(TEST_OUTPUT_FOLDER, does(exists()));
+        assertThat(TEST_OUTPUT_FOLDER, isDirectory());
     }
-
-    private static final String EBOOK_CSS = "img { display: block; margin-left: auto; margin-right: auto } h1,h2,h3,h4 { text-align: center }";
 
     @Test
-    public void test2() {
-        final Document ebook = Document.createShell("http://localhost/ebook");
-        ebook.head().appendElement("title").text("Eve Online Chronicles");
-        ebook.head().appendElement("style").attr("type", "text/css").text(EBOOK_CSS);
-
-        buildCoverPage(ebook.body().appendElement("div").attr("class", "CoverPage"));
-        buildTableOfContents(ebook.body().appendElement("div").attr("class", "TableOfConents"));
-        buildBookBody(ebook.body().appendElement("div").attr("class", "BookBody"));
-
-        System.out.println(ebook.toString());
+    public void shouldBeAbleToBuildTableOfContentsEntry() {
+        fail("Not yet implemented");
     }
 
-    private void buildCoverPage(final Element coverPage) {
-        coverPage.appendElement("a").attr("id", "start");
-        coverPage.appendElement("h2").text("Eve Online Chronicles");
-        coverPage.appendElement("img").attr("src", "#{imagesFolder}/EveOnlineChroniclesCover.jpg").attr("alt", "Cover");
-        coverPage.appendElement("p").text("Content copyright © CCP hf. All rights reserved");
-        appendAmazonPageBreak(coverPage);
+    @Test
+    public void shouldBeAbleToBuildChronicleBodyEntry() {
+        fail("Not yet implemented");
     }
 
-    private void buildTableOfContents(final Element tableOfContents) {
-        tableOfContents.appendElement("a").attr("id", "TOC");
-        tableOfContents.appendElement("h3").text("Table of Contents");
-        tableOfContents
-                .appendText("#{for Chronicle in Chronicles; do} #{table-of-contents-entry-template.html} #{done}");
-        appendAmazonPageBreak(tableOfContents);
+    @Test
+    public void shouldBeAbleToUpdateChronicleImageElement() {
+        fail("Not yet implemented");
     }
 
-    private void buildBookBody(final Element bookBody) {
-        bookBody.appendText("#{for Chronicle in Chronicles; do} #{chronicle-template.html} #{done}");
+    @Test
+    public void shouldBeAbleToDownloadChronicleImage() {
+        fail("Not yet implemented");
     }
 
-    private void appendAmazonPageBreak(final Element element) {
-        element.appendElement("mbp:pagebreak");
+    @Test
+    public void shouldBeAbleToCalculateCurrentChronicleIndex() {
+        fail("Not yet implemented");
     }
+
+    @Test
+    public void shouldBeAbleToGetChronicleImageDetails() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void shouldBeAbleToGetChronicleParagraphs() throws IOException {
+        final Document downloadedChronicle = getTestData(TEST_CHRONICLE_PAGE);
+        assertThat(downloadedChronicle, is(not(nullValue())));
+
+        final Elements paragraphs = getChronicleParagraphs(downloadedChronicle);
+        assertThat(paragraphs, are(not(nullValue())));
+        assertThat(paragraphs, are(not(empty())));
+        assertThat(paragraphs.size(), is(equalTo(4)));
+        assertThat(paragraphs.first().text(), containsString("A Fedo is a fairly small"));
+        assertThat(paragraphs.last().text(), containsString("the Fedo's life cycle is only a few weeks long."));
+    }
+
+    @Test
+    public void shouldBeAbleToGetChronicleTitle() throws IOException {
+        final Document downloadedChronicle = getTestData(TEST_CHRONICLE_PAGE);
+        assertThat(downloadedChronicle, is(not(nullValue())));
+
+        final String chronicleTitle = getChronicleTitle(downloadedChronicle);
+        assertThat(chronicleTitle, is(not(nullValue())));
+        assertThat(chronicleTitle, is(equalToIgnoringCase("Fedo (Chronicle)")));
+    }
+
+    @Test
+    public void shouldBeAbleToDownloadChroniclePageFromWiki() throws IOException {
+        final URL chronicleUrl = new URL("http://wiki.eveonline.com/en/wiki/Fedo_(Chronicle)");
+        final File chronicleDownloadFolder = new File(TEST_OUTPUT_FOLDER, "chronicleDownloads");
+
+        final Document result = downloadChroniclePageFromWiki(chronicleUrl, chronicleDownloadFolder);
+        assertThat(result, is(not(nullValue())));
+        assertThat(result.hasText(), is(true));
+        assertThat(result.text(), containsString("Fedo"));
+    }
+
+    @After
+    public void after() throws IOException {
+        FileUtils.deleteDirectory(TEST_OUTPUT_FOLDER);
+
+        assertThat(TEST_OUTPUT_FOLDER, does(not(exists())));
+    }
+
+    private Document getTestData(final String testDataFilename) throws IOException {
+        return Jsoup.parse(ResourceUtil.getFile(testDataFilename), "UTF-8");
+    }
+
 }

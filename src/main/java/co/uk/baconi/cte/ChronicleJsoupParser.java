@@ -1,6 +1,12 @@
 package co.uk.baconi.cte;
 
+import static co.uk.baconi.cte.utils.ChronicleParserUtil.appendChildren;
+import static co.uk.baconi.cte.utils.ChronicleParserUtil.cleanInnerHtml;
+import static co.uk.baconi.cte.utils.ChronicleParserUtil.getImageFileName;
+import static co.uk.baconi.cte.utils.ChronicleParserUtil.padded;
+
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
@@ -9,40 +15,40 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import co.uk.baconi.annotations.VisibleForTesting;
+
 public final class ChronicleJsoupParser {
+
     private ChronicleJsoupParser() {
     }
 
     /**
-     * Downloads a chronicle page, parses it and add's it to the ebook document.
-     * Along with downloading the chronicle image and the chronicles source code to a file.
+     * Downloads a chronicle page, parses it and add's it to the e-book document. Along with downloading the chronicle
+     * image and the chronicles source code to a file.
      */
     public static void parseChroniclePage(final Document ebook, final URL chronicleUrl, final File imageOutputFolder,
-            final File dumpingFolder) {
+            final File chronicleDownloadFolder) {
         try {
             // Download chronicle page from the wiki.
-            final Document downloadedChronicle = HttpConnection.connect(chronicleUrl).get();
-            FileUtils.write(dumpingFolder, downloadedChronicle.toString(), "UTF-8");
+            final Document downloadedChronicle = downloadChroniclePageFromWiki(chronicleUrl, chronicleDownloadFolder);
 
             // Parse chronicle page
             // - Get chronicle title.
             // - Get all the chronicle paragraphs.
             // - Get chronicle image.
-            final String chronicleTitle = downloadedChronicle.select("h1.header").first().text();
-            final Elements chronicleParagraphs = cleanInnerHtml(downloadedChronicle.select("div#bodyContent p"));
-            final Element chronicleImage = downloadedChronicle.select("a.image img").first();
+            final String chronicleTitle = getChronicleTitle(downloadedChronicle);
+            final Elements chronicleParagraphs = getChronicleParagraphs(downloadedChronicle);
+            final Element chronicleImage = getChronicleImageDetails(downloadedChronicle);
 
             // Calculate chronicle index
-            final int chronicleIndex = ebook.select("div.Chronicle").size() + 1;
+            final int chronicleIndex = calculateCurrentChronicleIndex(ebook);
 
             // Download chronicle image
-            // - Get image url
+            // - Get image URL
             // - Download to image output folder
             // - Update image element to point at image folder
-            final URL imageUrl = new URL(downloadedChronicle.baseUri() + chronicleImage.attr("src"));
-            final File imageDestination = new File(imageOutputFolder, getImageFileName(imageUrl));
-            FileUtils.copyURLToFile(imageUrl, imageDestination);
-            chronicleImage.attr("src", imageOutputFolder.getName() + "/" + imageDestination.getName());
+            final File downloadedImage = downloadChronicleImage(downloadedChronicle, chronicleImage, imageOutputFolder);
+            updateChronicleImageElement(chronicleImage, downloadedImage, imageOutputFolder);
 
             // Build chronicle entry
             // - Add bookmark point.
@@ -50,20 +56,12 @@ public final class ChronicleJsoupParser {
             // - Add chronicle image.
             // - Add chronicle paragraphs.
             // - Add amazon page break.
-            final Element chronicleEntry = ebook.select("div.BookBody").first().appendElement("div");
-            chronicleEntry.attr("class", "Chronicle");
-            chronicleEntry.appendElement("a").attr("id", "chap-" + chronicleIndex);
-            chronicleEntry.appendElement("h4").text("Chapter " + padded(chronicleIndex) + " - " + chronicleTitle);
-            chronicleEntry.appendChild(chronicleImage);
-            appendChildren(chronicleEntry.appendElement("div").attr("class", "ChronicleBody"), chronicleParagraphs);
-            chronicleEntry.append("<mbp:pagebreak/>");
+            buildChronicleBodyEntry(ebook, chronicleIndex, chronicleTitle, chronicleImage, chronicleParagraphs);
 
             // Build TOC entry
-            // - Create toc entry
+            // - Create TOC entry
             // - Add to correct place in TOC area
-            final Element tocEntry = ebook.createElement("a").attr("href", "#chap-" + chronicleIndex);
-            tocEntry.appendElement("h4").text(chronicleTitle);
-            ebook.select("div.TableOfConents").first().children().last().before(tocEntry);
+            buildTableOfContentsEntry(ebook, chronicleIndex, chronicleTitle);
 
         } catch (final Throwable t) {
             t.printStackTrace();
@@ -71,43 +69,91 @@ public final class ChronicleJsoupParser {
     }
 
     /**
-     * Appends all the given children to the parent Element.
+     * Builds a table of contents entry for the chronicle and adds it to the e-book template.
      */
-    private static Element appendChildren(final Element parent, final Elements children) {
-        for (final Element paragraph : children) {
-            parent.appendChild(paragraph);
-        }
-        return parent;
+    @VisibleForTesting
+    static void buildTableOfContentsEntry(final Document ebook, final int chronicleIndex, final String chronicleTitle) {
+        final Element tocEntry = ebook.createElement("a").attr("href", "#chap-" + chronicleIndex);
+        tocEntry.appendElement("h4").text(chronicleTitle);
+        ebook.select("div.TableOfConents").first().children().last().before(tocEntry);
     }
 
     /**
-     * Pads the index with zero's to three characters.
+     * Builds a chronicle body entry for the chronicle and adds it to the e-book template.
      */
-    private static String padded(final int index) {
-        return String.format("%03d", index);
+    @VisibleForTesting
+    static void buildChronicleBodyEntry(final Document ebook, final int chronicleIndex, final String chronicleTitle,
+            final Element chronicleImage, final Elements chronicleParagraphs) {
+        final Element chronicleEntry = ebook.select("div.BookBody").first().appendElement("div");
+        chronicleEntry.attr("class", "Chronicle");
+        chronicleEntry.appendElement("a").attr("id", "chap-" + chronicleIndex);
+        chronicleEntry.appendElement("h4").text("Chapter " + padded(chronicleIndex) + " - " + chronicleTitle);
+        chronicleEntry.appendChild(chronicleImage);
+        appendChildren(chronicleEntry.appendElement("div").attr("class", "ChronicleBody"), chronicleParagraphs);
+        chronicleEntry.append("<mbp:pagebreak/>");
     }
 
     /**
-     * Removes all the HTML tags inside of each element.
+     * Updates the chronicle image element to point to the download folder.
      */
-    private static Elements cleanInnerHtml(final Elements elements) {
-        for (final Element element : elements) {
-            element.text(element.text());
-        }
-        return elements;
+    @VisibleForTesting
+    static void updateChronicleImageElement(final Element chronicleImage, final File imageDestination,
+            final File imageOutputFolder) {
+        chronicleImage.attr("src", imageOutputFolder.getName() + "/" + imageDestination.getName());
     }
 
     /**
-     * Finds the name from the URL for an image.
+     * Downloads the chronicle image to the given folder.
      */
-    private static String getImageFileName(final URL imageUrl) {
-        return last(imageUrl.toString().split("/"));
+    @VisibleForTesting
+    static File downloadChronicleImage(final Document downloadedChronicle, final Element chronicleImage,
+            final File imageOutputFolder) throws IOException {
+        final URL imageUrl = new URL(downloadedChronicle.baseUri() + chronicleImage.attr("src"));
+        final File imageDestination = new File(imageOutputFolder, getImageFileName(imageUrl));
+        FileUtils.copyURLToFile(imageUrl, imageDestination);
+        return imageDestination;
     }
 
     /**
-     * Get the last element in the array
+     * Calculates the current chronicles index number from the e-book template.
      */
-    private static <T> T last(final T[] array) {
-        return (array == null || array.length < 0) ? null : array[array.length - 1];
+    @VisibleForTesting
+    static int calculateCurrentChronicleIndex(final Document ebook) {
+        return ebook.select("div.Chronicle").size() + 1;
+    }
+
+    /**
+     * Get the chronicle image element from the downloaded chronicle.
+     */
+    @VisibleForTesting
+    static Element getChronicleImageDetails(final Document downloadedChronicle) {
+        return downloadedChronicle.select("a.image img").first();
+    }
+
+    /**
+     * Get the chronicle paragraphs from the downloaded chronicle
+     */
+    @VisibleForTesting
+    static Elements getChronicleParagraphs(final Document downloadedChronicle) {
+        return cleanInnerHtml(downloadedChronicle.select("div#bodyContent p"));
+    }
+
+    /**
+     * Get the chronicle title from the downloaded chronicle.
+     */
+    @VisibleForTesting
+    static String getChronicleTitle(final Document downloadedChronicle) {
+        return downloadedChronicle.select("h1.header").first().text();
+    }
+
+    /**
+     * Download the chronicle page from the wiki.
+     */
+    @VisibleForTesting
+    static Document downloadChroniclePageFromWiki(final URL chronicleUrl, final File chronicleDownloadFolder)
+            throws IOException {
+        final Document downloadedChronicle = HttpConnection.connect(chronicleUrl).get();
+        FileUtils.write(chronicleDownloadFolder, downloadedChronicle.toString(), "UTF-8");
+        return downloadedChronicle;
     }
 }
