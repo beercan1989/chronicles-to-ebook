@@ -68,8 +68,9 @@ public final class Runner {
         // .... Should include chronicle image download & setting up links
         // .... Should include adding TOC entry in e-book
         // .... Should include adding chronicle body into e-book.
+        int index = 1;
         for (final URL chronicleUrl : chronicleUrls) {
-            LOG.debug("Parsing chronicle [" + chronicleUrl + "].");
+            LOG.debug("Parsing chronicle [" + index++ + "], [" + chronicleUrl + "].");
             parseChroniclePage(ebook, chronicleUrl, imageOutputFolder, chronicleDownloadFolder);
         }
 

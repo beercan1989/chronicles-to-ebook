@@ -44,7 +44,7 @@ public final class ChronicleParser {
             // - Get all the chronicle paragraphs.
             // - Get chronicle image.
             final String chronicleTitle = getChronicleTitle(downloadedChronicle);
-            final Element chronicleImage = getChronicleImageDetails(downloadedChronicle).clone();
+            final Element chronicleImage = getChronicleImageDetails(downloadedChronicle);
             final Elements chronicleParagraphs = getChronicleParagraphs(downloadedChronicle);
 
             // Calculate chronicle index
@@ -54,8 +54,13 @@ public final class ChronicleParser {
             // - Get image URL
             // - Download to image output folder
             // - Update image element to point at image folder
-            final File downloadedImage = downloadChronicleImage(downloadedChronicle, chronicleImage, imageOutputFolder);
-            updateChronicleImageElement(chronicleImage, downloadedImage, imageOutputFolder);
+            if (chronicleImage != null) {
+                final File downloadedImage = downloadChronicleImage(downloadedChronicle, chronicleImage,
+                        imageOutputFolder);
+                updateChronicleImageElement(chronicleImage, downloadedImage, imageOutputFolder);
+            } else {
+                LOG.debug(downloadedChronicle.select("img"));
+            }
 
             // Remove any empty paragraphs.
             removeAnyEmptyParagraphs(chronicleParagraphs);
@@ -115,7 +120,9 @@ public final class ChronicleParser {
         chronicleEntry.attr("class", "Chronicle");
         chronicleEntry.appendElement("a").attr("id", "chap-" + chronicleIndex);
         chronicleEntry.appendElement("h4").text("Chapter " + padded(chronicleIndex) + " - " + chronicleTitle);
-        chronicleEntry.appendChild(chronicleImage);
+        if (chronicleImage != null) {
+            chronicleEntry.appendChild(chronicleImage);
+        }
         appendChildren(chronicleEntry.appendElement("div").attr("class", "ChronicleBody"), chronicleParagraphs);
         chronicleEntry.append("<mbp:pagebreak />");
     }
@@ -154,7 +161,11 @@ public final class ChronicleParser {
      */
     @VisibleForTesting
     static Element getChronicleImageDetails(final Document downloadedChronicle) {
-        return downloadedChronicle.select("a.image img").first();
+        final Element first = downloadedChronicle.select("a.image img").first();
+        if (first == null) {
+            return null;
+        }
+        return first.clone();
     }
 
     /**
