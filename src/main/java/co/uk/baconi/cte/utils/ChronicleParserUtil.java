@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.jsoup.helper.HttpConnection;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -66,7 +67,7 @@ public final class ChronicleParserUtil {
      * Finds the name from the URL for an image.
      */
     public static String getImageFileName(final URL imageUrl) {
-        return last(imageUrl.toString().split("/"));
+        return StringEscapeUtils.unescapeHtml(last(imageUrl.toString().split("/")));
     }
 
     /**
