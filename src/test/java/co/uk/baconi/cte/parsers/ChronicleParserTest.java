@@ -28,6 +28,8 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -40,6 +42,13 @@ import co.uk.baconi.cte.utils.ChronicleParserUtil;
 import co.uk.baconi.cte.utils.ResourceUtil;
 
 public class ChronicleParserTest extends AbstractChronicleTest {
+
+    @Test
+    public void test1() throws MalformedURLException {
+        ChronicleParser.parseChroniclePage(ChronicleParserUtil.buildBaseEbook(TEST_OUTPUT_FOLDER), new URL(
+                "http://wiki.eveonline.com/en/wiki/The_Hanging_Long-limb_(Chronicle)"), TEST_OUTPUT_FOLDER,
+                TEST_OUTPUT_FOLDER);
+    }
 
     @Test
     public void shouldBeAbleToBuildTableOfContentsEntry() {

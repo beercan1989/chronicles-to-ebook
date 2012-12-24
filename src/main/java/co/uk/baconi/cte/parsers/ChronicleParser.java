@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -19,6 +21,8 @@ import org.jsoup.select.Elements;
 import co.uk.baconi.annotations.VisibleForTesting;
 
 public final class ChronicleParser {
+
+    private static final Log LOG = LogFactory.getLog(ChronicleParser.class);
 
     private ChronicleParser() {
     }
@@ -38,8 +42,8 @@ public final class ChronicleParser {
             // - Get all the chronicle paragraphs.
             // - Get chronicle image.
             final String chronicleTitle = getChronicleTitle(downloadedChronicle);
+            final Element chronicleImage = getChronicleImageDetails(downloadedChronicle).clone();
             final Elements chronicleParagraphs = getChronicleParagraphs(downloadedChronicle);
-            final Element chronicleImage = getChronicleImageDetails(downloadedChronicle);
 
             // Calculate chronicle index
             final int chronicleIndex = calculateCurrentChronicleIndex(ebook);
@@ -50,6 +54,9 @@ public final class ChronicleParser {
             // - Update image element to point at image folder
             final File downloadedImage = downloadChronicleImage(downloadedChronicle, chronicleImage, imageOutputFolder);
             updateChronicleImageElement(chronicleImage, downloadedImage, imageOutputFolder);
+
+            // Remove any empty paragraphs.
+            removeAnyEmptyParagraphs(chronicleParagraphs);
 
             // Build chronicle entry
             // - Add bookmark point.
@@ -65,8 +72,21 @@ public final class ChronicleParser {
             buildTableOfContentsEntry(ebook, chronicleIndex, chronicleTitle);
 
         } catch (final Throwable t) {
-            t.printStackTrace();
+            LOG.error("Failed to parse chronicle page [" + chronicleUrl + "]", t);
         }
+    }
+
+    /**
+     * Removes any paragraphs that are empty from the collection.
+     */
+    @VisibleForTesting
+    static Elements removeAnyEmptyParagraphs(final Elements chronicleParagraphs) {
+        for (final Element paragraph : chronicleParagraphs) {
+            if (!paragraph.hasText()) {
+                chronicleParagraphs.remove(paragraph);
+            }
+        }
+        return chronicleParagraphs;
     }
 
     /**

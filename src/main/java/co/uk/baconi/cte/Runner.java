@@ -1,5 +1,9 @@
 package co.uk.baconi.cte;
 
+import static co.uk.baconi.cte.parsers.ChronicleCollectionParser.parseChronicleCollections;
+import static co.uk.baconi.cte.parsers.ChronicleParser.parseChroniclePage;
+import static co.uk.baconi.cte.utils.ChronicleParserUtil.buildBaseEbook;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -8,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.jsoup.nodes.Document;
 
 import co.uk.baconi.cte.utils.ResourceUtil;
 
@@ -34,36 +39,56 @@ public final class Runner {
     public Runner() throws MalformedURLException {
         final String baseUrl = "http://wiki.eveonline.com";
         chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/Pre-Launch_(chronicles)"));
-        chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2003_(chronicles)"));
-        chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2004_(chronicles)"));
-        chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2005_(chronicles)"));
-        chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2006_(chronicles)"));
-        chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2007_(chronicles)"));
-        chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2008_(chronicles)"));
-        chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2009_(chronicles)"));
-        chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2010_(chronicles)"));
-        chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2011_(chronicles)"));
-        chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2012_(chronicles)"));
+        // chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2003_(chronicles)"));
+        // chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2004_(chronicles)"));
+        // chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2005_(chronicles)"));
+        // chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2006_(chronicles)"));
+        // chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2007_(chronicles)"));
+        // chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2008_(chronicles)"));
+        // chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2009_(chronicles)"));
+        // chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2010_(chronicles)"));
+        // chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2011_(chronicles)"));
+        // chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2012_(chronicles)"));
     }
 
     public void run() {
         // 1) Find all chronicle url's and store them chronologically.
+        final List<URL> chronicleUrls = parseChronicleCollections(chronicleCollectionPages, chronicleDownloadFolder);
+
         // 2) Create e-book from template.
+        final Document ebook = buildBaseEbook(imageOutputFolder);
+
         // 3) Download and parse each chronicle page.
         // .... Should include chronicle image download & setting up links
         // .... Should include adding TOC entry in e-book
         // .... Should include adding chronicle body into e-book.
+        for (final URL chronicleUrl : chronicleUrls) {
+            parseChroniclePage(ebook, chronicleUrl, imageOutputFolder, chronicleDownloadFolder);
+        }
+
         // 4) Write e-book to file
+        saveEbooktoOutputFolder(ebook);
+
+        // 5) Output the cover image.
+        saveCoverImageToOutputFolder();
 
         // # Optional - add in the ability to run amazon's tool with this application.
-
     }
 
-    private void outputCoverImage() {
+    private void saveEbooktoOutputFolder(final Document ebook) {
+        try {
+            FileUtils.writeStringToFile(ebookOutputFile, ebook.toString(), "UTF-8");
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveCoverImageToOutputFolder() {
         final File coverImage = ResourceUtil.getFile("/EveOnlineChroniclesCover.jpg");
         try {
             FileUtils.copyFileToDirectory(coverImage, imageOutputFolder);
         } catch (final IOException e) {
+            e.printStackTrace();
         }
     }
 }

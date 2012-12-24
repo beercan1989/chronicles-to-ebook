@@ -13,6 +13,7 @@ import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 
 public final class ChronicleParserUtil {
+
     private ChronicleParserUtil() {
     }
 
