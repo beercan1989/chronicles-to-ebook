@@ -23,7 +23,7 @@ public final class ChronicleParserUtil {
     public static Document downloadChroniclePageFromWiki(final URL chronicleUrl, final File chronicleDownloadFolder)
             throws IOException {
         final Document downloadedChronicle = HttpConnection.connect(chronicleUrl).get();
-        final File chronicleOutputFile = new File(chronicleDownloadFolder, getImageFileName(chronicleUrl));
+        final File chronicleOutputFile = new File(chronicleDownloadFolder, getImageFileName(chronicleUrl) + ".html");
         FileUtils.write(chronicleOutputFile, downloadedChronicle.toString(), "UTF-8");
         return downloadedChronicle;
     }

@@ -10,6 +10,8 @@ import static co.uk.baconi.cte.utils.ChronicleParserUtil.padded;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
@@ -81,11 +83,15 @@ public final class ChronicleParser {
      */
     @VisibleForTesting
     static Elements removeAnyEmptyParagraphs(final Elements chronicleParagraphs) {
+        final List<Element> toRemove = new ArrayList<Element>();
         for (final Element paragraph : chronicleParagraphs) {
             if (!paragraph.hasText()) {
-                chronicleParagraphs.remove(paragraph);
+                toRemove.add(paragraph);
             }
         }
+
+        chronicleParagraphs.removeAll(toRemove);
+
         return chronicleParagraphs;
     }
 
@@ -164,7 +170,7 @@ public final class ChronicleParser {
      */
     @VisibleForTesting
     static String getChronicleTitle(final Document downloadedChronicle) {
-        return downloadedChronicle.select("h1.header").first().text();
+        return downloadedChronicle.select("h1.header").first().text().replaceAll("\\(Chronicle\\)", "");
     }
 
 }
