@@ -76,7 +76,7 @@ public final class ChronicleParser {
             // Build TOC entry
             // - Create TOC entry
             // - Add to correct place in TOC area
-            buildTableOfContentsEntry(ebook, chronicleIndex, chronicleTitle);
+            // buildTableOfContentsEntry(ebook, chronicleIndex, chronicleTitle);
 
         } catch (final Throwable t) {
             LOG.error("Failed to parse chronicle page [" + chronicleUrl + "]", t);
@@ -105,8 +105,8 @@ public final class ChronicleParser {
      */
     @VisibleForTesting
     static void buildTableOfContentsEntry(final Document ebook, final int chronicleIndex, final String chronicleTitle) {
-        final Element tocEntry = ebook.createElement("a").attr("href", "#chap-" + chronicleIndex);
-        tocEntry.appendElement("h4").text(chronicleTitle);
+        final Element tocEntry = ebook.createElement("h4").appendElement("a").attr("href", "#chap-" + chronicleIndex);
+        tocEntry.text(chronicleTitle);
         ebook.select("div.TableOfConents").first().children().last().before(tocEntry);
     }
 

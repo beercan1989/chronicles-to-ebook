@@ -107,10 +107,10 @@ public final class ChronicleParserUtil {
         coverPage.append("<mbp:pagebreak />");
 
         // Create the table of contents.
-        final Element tableOfContents = ebook.body().appendElement("div").attr("class", "TableOfConents");
-        tableOfContents.appendElement("a").attr("id", "TOC");
-        tableOfContents.appendElement("h3").text("Table of Contents");
-        tableOfContents.append("<mbp:pagebreak />");
+        // final Element tableOfContents = ebook.body().appendElement("div").attr("class", "TableOfConents");
+        // tableOfContents.appendElement("a").attr("id", "TOC");
+        // tableOfContents.appendElement("h3").text("Table of Contents");
+        // tableOfContents.append("<mbp:pagebreak />");
 
         // Create the area for the chronicle content.
         ebook.body().appendElement("div").attr("class", "BookBody");
