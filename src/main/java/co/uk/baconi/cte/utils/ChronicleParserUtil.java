@@ -14,6 +14,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 
+import co.uk.baconi.annotations.VisibleForTesting;
+
 public final class ChronicleParserUtil {
     private ChronicleParserUtil() {
     }
@@ -71,9 +73,16 @@ public final class ChronicleParserUtil {
      */
     public static Elements cleanInnerHtml(final Elements elements) {
         for (final Element element : elements) {
-            element.text(element.text());
+            cleanInnerHtml(element);
         }
         return elements;
+    }
+
+    /**
+     * Removes all the HTML tags inside of the element.
+     */
+    public static Element cleanInnerHtml(final Element element) {
+        return element.text(element.text());
     }
 
     /**
@@ -84,7 +93,7 @@ public final class ChronicleParserUtil {
     }
 
     /**
-     * Get the last element in the array
+     * Get the last element in the array.
      */
     public static <T> T last(final T[] array) {
         return (array == null || array.length < 0) ? null : array[array.length - 1];
@@ -95,7 +104,6 @@ public final class ChronicleParserUtil {
      */
     public static URL getDownloadableImageUrl(final Document chronicle, final Element image)
             throws MalformedURLException {
-        final URL baseUrl = new URL(chronicle.baseUri());
         return new URL(getBaseUrl(chronicle) + image.attr("src"));
     }
 
@@ -132,7 +140,11 @@ public final class ChronicleParserUtil {
         return ebook;
     }
 
-    private static String getBaseUrl(final Node node) throws MalformedURLException {
+    /**
+     * Gets the base URL for the web site from the nodes base URI.
+     */
+    @VisibleForTesting
+    static String getBaseUrl(final Node node) throws MalformedURLException {
         final URL baseUrl = new URL(node.baseUri());
         return baseUrl.getProtocol() + "://" + baseUrl.getHost();
     }
