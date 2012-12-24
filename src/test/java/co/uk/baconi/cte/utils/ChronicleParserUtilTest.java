@@ -4,21 +4,16 @@ import static co.uk.baconi.cte.utils.ChronicleParserUtil.appendChildren;
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.cleanInnerHtml;
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.downloadChroniclePageFromWiki;
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.getBaseUrl;
-import static co.uk.baconi.cte.utils.ChronicleParserUtil.getChroniclePages;
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.getDownloadableImageUrl;
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.getImageFileName;
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.last;
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.padded;
-import static co.uk.baconi.matchers.Does.does;
-import static co.uk.baconi.matchers.FileMatchers.exists;
-import static co.uk.baconi.matchers.FileMatchers.isDirectory;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
@@ -26,46 +21,17 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
-public class ChronicleParserUtilTest {
+import co.uk.baconi.cte.AbstractChronicleTest;
 
-    private static final String EMPTY = "";
-    private static final File TEST_OUTPUT_FOLDER = new File("test-output-folder");
-
-    @Before
-    public void before() {
-        TEST_OUTPUT_FOLDER.mkdir();
-
-        assertThat(TEST_OUTPUT_FOLDER, does(exists()));
-        assertThat(TEST_OUTPUT_FOLDER, isDirectory());
-    }
-
-    @Test
-    public void shouldBeAbleToGetChroniclePages() throws MalformedURLException, IOException {
-        final URL colletionUrl = new URL("http://wiki.eveonline.com/en/wiki/Pre-Launch_(chronicles)");
-        final File outputFile = new File(TEST_OUTPUT_FOLDER, "test-output.html");
-
-        assertThat(colletionUrl, is(not(nullValue())));
-        assertThat(outputFile, is(not(nullValue())));
-
-        final List<URL> chroniclePages = getChroniclePages(colletionUrl, outputFile);
-
-        assertThat(chroniclePages, is(not(nullValue())));
-        assertThat(chroniclePages, is(not(empty())));
-        assertThat(chroniclePages, hasSize(65));
-        assertThat(chroniclePages.get(0).toString(), containsString("Fedo_(Chronicle)"));
-    }
+public class ChronicleParserUtilTest extends AbstractChronicleTest {
 
     @Test
     public void shouldBeAbleToDownloadChroniclePageFromWiki() throws IOException {
@@ -82,7 +48,8 @@ public class ChronicleParserUtilTest {
     @Test
     public void shouldBeAbleToAppendChildren() {
         final Element parent = new Element(Tag.valueOf("div"), EMPTY);
-        final Elements children = new Elements(new Element(Tag.valueOf("p"), EMPTY), new Element(Tag.valueOf("p"), EMPTY));
+        final Elements children = new Elements(new Element(Tag.valueOf("p"), EMPTY), new Element(Tag.valueOf("p"),
+                EMPTY));
 
         assertThat(parent.children(), hasSize(0));
 
@@ -160,13 +127,6 @@ public class ChronicleParserUtilTest {
 
         assertThat(baseUrl, is(not(nullValue())));
         assertThat(baseUrl, is(equalTo("http://wiki.eveonline.com")));
-    }
-
-    @After
-    public void after() throws IOException {
-        FileUtils.deleteDirectory(TEST_OUTPUT_FOLDER);
-
-        assertThat(TEST_OUTPUT_FOLDER, does(not(exists())));
     }
 
 }

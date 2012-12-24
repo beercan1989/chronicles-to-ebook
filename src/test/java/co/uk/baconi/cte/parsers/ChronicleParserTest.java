@@ -1,13 +1,13 @@
-package co.uk.baconi.cte;
+package co.uk.baconi.cte.parsers;
 
-import static co.uk.baconi.cte.ChronicleParser.buildChronicleBodyEntry;
-import static co.uk.baconi.cte.ChronicleParser.buildTableOfContentsEntry;
-import static co.uk.baconi.cte.ChronicleParser.calculateCurrentChronicleIndex;
-import static co.uk.baconi.cte.ChronicleParser.downloadChronicleImage;
-import static co.uk.baconi.cte.ChronicleParser.getChronicleImageDetails;
-import static co.uk.baconi.cte.ChronicleParser.getChronicleParagraphs;
-import static co.uk.baconi.cte.ChronicleParser.getChronicleTitle;
-import static co.uk.baconi.cte.ChronicleParser.updateChronicleImageElement;
+import static co.uk.baconi.cte.parsers.ChronicleParser.buildChronicleBodyEntry;
+import static co.uk.baconi.cte.parsers.ChronicleParser.buildTableOfContentsEntry;
+import static co.uk.baconi.cte.parsers.ChronicleParser.calculateCurrentChronicleIndex;
+import static co.uk.baconi.cte.parsers.ChronicleParser.downloadChronicleImage;
+import static co.uk.baconi.cte.parsers.ChronicleParser.getChronicleImageDetails;
+import static co.uk.baconi.cte.parsers.ChronicleParser.getChronicleParagraphs;
+import static co.uk.baconi.cte.parsers.ChronicleParser.getChronicleTitle;
+import static co.uk.baconi.cte.parsers.ChronicleParser.updateChronicleImageElement;
 import static co.uk.baconi.matchers.Are.are;
 import static co.uk.baconi.matchers.Does.does;
 import static co.uk.baconi.matchers.FileMatchers.exists;
@@ -29,30 +29,17 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
+import co.uk.baconi.cte.AbstractChronicleTest;
 import co.uk.baconi.cte.utils.ChronicleParserUtil;
 import co.uk.baconi.cte.utils.ResourceUtil;
 
-public class ChronicleParserTest {
-
-    private static final File TEST_OUTPUT_FOLDER = new File("test-output-folder");
-    private static final String TEST_CHRONICLE_PAGE = "/fedo-chronicle-page.html";
-
-    @Before
-    public void before() {
-        TEST_OUTPUT_FOLDER.mkdir();
-
-        assertThat(TEST_OUTPUT_FOLDER, does(exists()));
-        assertThat(TEST_OUTPUT_FOLDER, isDirectory());
-    }
+public class ChronicleParserTest extends AbstractChronicleTest {
 
     @Test
     public void shouldBeAbleToBuildTableOfContentsEntry() {
@@ -172,13 +159,6 @@ public class ChronicleParserTest {
         final String chronicleTitle = getChronicleTitle(downloadedChronicle);
         assertThat(chronicleTitle, is(not(nullValue())));
         assertThat(chronicleTitle, is(equalToIgnoringCase("Fedo (Chronicle)")));
-    }
-
-    @After
-    public void after() throws IOException {
-        FileUtils.deleteDirectory(TEST_OUTPUT_FOLDER);
-
-        assertThat(TEST_OUTPUT_FOLDER, does(not(exists())));
     }
 
     private Document getTestData(final String testDataFilename) throws IOException {

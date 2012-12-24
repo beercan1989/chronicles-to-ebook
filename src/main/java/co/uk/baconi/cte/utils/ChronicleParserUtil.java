@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.jsoup.helper.HttpConnection;
@@ -14,31 +12,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 
-import co.uk.baconi.annotations.VisibleForTesting;
-
 public final class ChronicleParserUtil {
     private ChronicleParserUtil() {
-    }
-
-    public static List<URL> getChroniclePages(final URL chronicleCollectionPage, final File collectionDownloadFolder)
-            throws IOException {
-        final List<URL> chroniclePages = new ArrayList<URL>();
-
-        final Document chronicleCollection = downloadChroniclePageFromWiki(chronicleCollectionPage,
-                collectionDownloadFolder);
-
-        final Element chronicleList = chronicleCollection.select("#Chronological").first().parent()
-                .nextElementSibling();
-
-        final Elements chronicleLinks = chronicleList.select("a");
-        final String baseUrl = getBaseUrl(chronicleCollection);
-
-        for (final Element chronicleLink : chronicleLinks) {
-            final String chronicleUrl = chronicleLink.attr("href");
-            chroniclePages.add(new URL(baseUrl + chronicleUrl));
-        }
-
-        return chroniclePages;
     }
 
     /**
@@ -47,7 +22,8 @@ public final class ChronicleParserUtil {
     public static Document downloadChroniclePageFromWiki(final URL chronicleUrl, final File chronicleDownloadFolder)
             throws IOException {
         final Document downloadedChronicle = HttpConnection.connect(chronicleUrl).get();
-        FileUtils.write(chronicleDownloadFolder, downloadedChronicle.toString(), "UTF-8");
+        final File chronicleOutputFile = new File(chronicleDownloadFolder, getImageFileName(chronicleUrl));
+        FileUtils.write(chronicleOutputFile, downloadedChronicle.toString(), "UTF-8");
         return downloadedChronicle;
     }
 
@@ -143,7 +119,6 @@ public final class ChronicleParserUtil {
     /**
      * Gets the base URL for the web site from the nodes base URI.
      */
-    @VisibleForTesting
     static String getBaseUrl(final Node node) throws MalformedURLException {
         final URL baseUrl = new URL(node.baseUri());
         return baseUrl.getProtocol() + "://" + baseUrl.getHost();

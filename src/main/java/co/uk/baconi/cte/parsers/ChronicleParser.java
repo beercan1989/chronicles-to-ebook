@@ -1,4 +1,4 @@
-package co.uk.baconi.cte;
+package co.uk.baconi.cte.parsers;
 
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.appendChildren;
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.cleanInnerHtml;
