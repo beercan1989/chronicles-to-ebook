@@ -16,7 +16,8 @@ import org.junit.Before;
 public abstract class AbstractChronicleTest {
 
     protected static final File TEST_OUTPUT_FOLDER = new File("test-output-folder");
-    protected static final String TEST_CHRONICLE_PAGE = "/fedo-chronicle-page.html";
+    protected static final String TEST_CHRONICLE_PAGE_FEDO = "/fedo-chronicle-page.html";
+    protected static final String TEST_CHRONICLE_PAGE_MINDCLASH = "/mind-clash-chronicle.html";
     protected static final String EMPTY = "";
 
     @Before

@@ -7,6 +7,7 @@ import static co.uk.baconi.cte.parsers.ChronicleParser.downloadChronicleImage;
 import static co.uk.baconi.cte.parsers.ChronicleParser.getChronicleImageDetails;
 import static co.uk.baconi.cte.parsers.ChronicleParser.getChronicleParagraphs;
 import static co.uk.baconi.cte.parsers.ChronicleParser.getChronicleTitle;
+import static co.uk.baconi.cte.parsers.ChronicleParser.removeAnyEmptyParagraphs;
 import static co.uk.baconi.cte.parsers.ChronicleParser.updateChronicleImageElement;
 import static co.uk.baconi.matchers.Are.are;
 import static co.uk.baconi.matchers.Does.does;
@@ -28,13 +29,12 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import co.uk.baconi.cte.AbstractChronicleTest;
@@ -44,13 +44,45 @@ import co.uk.baconi.cte.utils.ResourceUtil;
 public class ChronicleParserTest extends AbstractChronicleTest {
 
     @Test
-    public void test1() throws MalformedURLException {
-        ChronicleParser.parseChroniclePage(ChronicleParserUtil.buildBaseEbook(TEST_OUTPUT_FOLDER), new URL(
-                "http://wiki.eveonline.com/en/wiki/The_Hanging_Long-limb_(Chronicle)"), TEST_OUTPUT_FOLDER,
-                TEST_OUTPUT_FOLDER);
+    public void shouldBeAbleToParseWithoutWeirdCharactersAppearing() throws IOException {
+        final Document downloadedChronicle = getTestData(TEST_CHRONICLE_PAGE_MINDCLASH);
+
+        final String title = getChronicleTitle(downloadedChronicle);
+        final Element image = getChronicleImageDetails(downloadedChronicle);
+        final Elements paragraphs = getChronicleParagraphs(downloadedChronicle);
+
+        assertThat(title, is(not(nullValue())));
+        assertThat(title, is(equalTo("Mind Clash")));
+
+        assertThat(image, is(not(nullValue())));
+        assertThat(image.attr("alt"), is(equalToIgnoringCase("Mindclash.jpg")));
+        assertThat(image.attr("src"), endsWith("Mindclash.jpg"));
+
+        assertThat(paragraphs, are(not(nullValue())));
+        assertThat(paragraphs, are(not(empty())));
+        assertThat(paragraphs.size(), is(equalTo(6)));
+        assertThat(paragraphs.get(0).text(), is(equalTo(ResourceUtil.getString("/mind-clash-paragraphs/1.txt"))));
+        assertThat(paragraphs.get(1).text(), is(equalTo(ResourceUtil.getString("/mind-clash-paragraphs/2.txt"))));
+        assertThat(paragraphs.get(2).text(), is(equalTo(ResourceUtil.getString("/mind-clash-paragraphs/3.txt"))));
+        assertThat(paragraphs.get(3).text(), is(equalTo(ResourceUtil.getString("/mind-clash-paragraphs/4.txt"))));
+        assertThat(paragraphs.get(4).text(), is(equalTo(ResourceUtil.getString("/mind-clash-paragraphs/5.txt"))));
+        assertThat(paragraphs.get(5).text(), is(equalTo(ResourceUtil.getString("/mind-clash-paragraphs/6.txt"))));
+
+        removeAnyEmptyParagraphs(paragraphs);
+
+        assertThat(paragraphs, are(not(nullValue())));
+        assertThat(paragraphs, are(not(empty())));
+        assertThat(paragraphs.size(), is(equalTo(6)));
+        assertThat(paragraphs.get(0).text(), is(equalTo(ResourceUtil.getString("/mind-clash-paragraphs/1.txt"))));
+        assertThat(paragraphs.get(1).text(), is(equalTo(ResourceUtil.getString("/mind-clash-paragraphs/2.txt"))));
+        assertThat(paragraphs.get(2).text(), is(equalTo(ResourceUtil.getString("/mind-clash-paragraphs/3.txt"))));
+        assertThat(paragraphs.get(3).text(), is(equalTo(ResourceUtil.getString("/mind-clash-paragraphs/4.txt"))));
+        assertThat(paragraphs.get(4).text(), is(equalTo(ResourceUtil.getString("/mind-clash-paragraphs/5.txt"))));
+        assertThat(paragraphs.get(5).text(), is(equalTo(ResourceUtil.getString("/mind-clash-paragraphs/6.txt"))));
     }
 
     @Test
+    @Ignore("Ignored due to Table Of Contents being excluded from the e-book.")
     public void shouldBeAbleToBuildTableOfContentsEntry() {
         final Document ebook = getTestEbook();
         assertThat(ebook, is(not(nullValue())));
@@ -64,7 +96,7 @@ public class ChronicleParserTest extends AbstractChronicleTest {
     @Test
     public void shouldBeAbleToBuildChronicleBodyEntry() throws IOException {
         final Document ebook = getTestEbook();
-        final Document downloadedChronicle = getTestData(TEST_CHRONICLE_PAGE);
+        final Document downloadedChronicle = getTestData(TEST_CHRONICLE_PAGE_FEDO);
         final Element chronicleImage = getChronicleImageDetails(downloadedChronicle);
         final Elements chronicleParagraphs = getChronicleParagraphs(downloadedChronicle);
 
@@ -85,7 +117,7 @@ public class ChronicleParserTest extends AbstractChronicleTest {
 
     @Test
     public void shouldBeAbleToUpdateChronicleImageElement() throws IOException {
-        final Document downloadedChronicle = getTestData(TEST_CHRONICLE_PAGE);
+        final Document downloadedChronicle = getTestData(TEST_CHRONICLE_PAGE_FEDO);
         final Element chronicleImage = getChronicleImageDetails(downloadedChronicle);
 
         assertThat(downloadedChronicle, is(not(nullValue())));
@@ -102,7 +134,7 @@ public class ChronicleParserTest extends AbstractChronicleTest {
 
     @Test
     public void shouldBeAbleToDownloadChronicleImage() throws IOException {
-        final Document downloadedChronicle = getTestData(TEST_CHRONICLE_PAGE);
+        final Document downloadedChronicle = getTestData(TEST_CHRONICLE_PAGE_FEDO);
         downloadedChronicle.setBaseUri("http://wiki.eveonline.com/en/wiki/Fedo_(Chronicle)");
         final Element chronicleImage = getChronicleImageDetails(downloadedChronicle);
 
@@ -138,7 +170,7 @@ public class ChronicleParserTest extends AbstractChronicleTest {
 
     @Test
     public void shouldBeAbleToGetChronicleImageDetails() throws IOException {
-        final Document downloadedChronicle = getTestData(TEST_CHRONICLE_PAGE);
+        final Document downloadedChronicle = getTestData(TEST_CHRONICLE_PAGE_FEDO);
         assertThat(downloadedChronicle, is(not(nullValue())));
 
         final Element chronicleImageDetails = getChronicleImageDetails(downloadedChronicle);
@@ -149,7 +181,7 @@ public class ChronicleParserTest extends AbstractChronicleTest {
 
     @Test
     public void shouldBeAbleToGetChronicleParagraphs() throws IOException {
-        final Document downloadedChronicle = getTestData(TEST_CHRONICLE_PAGE);
+        final Document downloadedChronicle = getTestData(TEST_CHRONICLE_PAGE_FEDO);
         assertThat(downloadedChronicle, is(not(nullValue())));
 
         final Elements paragraphs = getChronicleParagraphs(downloadedChronicle);
@@ -162,12 +194,12 @@ public class ChronicleParserTest extends AbstractChronicleTest {
 
     @Test
     public void shouldBeAbleToGetChronicleTitle() throws IOException {
-        final Document downloadedChronicle = getTestData(TEST_CHRONICLE_PAGE);
+        final Document downloadedChronicle = getTestData(TEST_CHRONICLE_PAGE_FEDO);
         assertThat(downloadedChronicle, is(not(nullValue())));
 
         final String chronicleTitle = getChronicleTitle(downloadedChronicle);
         assertThat(chronicleTitle, is(not(nullValue())));
-        assertThat(chronicleTitle, is(equalToIgnoringCase("Fedo (Chronicle)")));
+        assertThat(chronicleTitle, is(equalToIgnoringCase("Fedo")));
     }
 
     private Document getTestData(final String testDataFilename) throws IOException {

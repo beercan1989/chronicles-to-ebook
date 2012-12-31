@@ -7,7 +7,7 @@ import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.jsoup.helper.HttpConnection;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
@@ -23,10 +23,14 @@ public final class ChronicleParserUtil {
      */
     public static Document downloadChroniclePageFromWiki(final URL chronicleUrl, final File chronicleDownloadFolder)
             throws IOException {
-        final Document downloadedChronicle = HttpConnection.connect(chronicleUrl).get();
-        final File chronicleOutputFile = new File(chronicleDownloadFolder, getImageFileName(chronicleUrl) + ".html");
-        FileUtils.write(chronicleOutputFile, downloadedChronicle.toString(), "UTF-8");
-        return downloadedChronicle;
+        // Calculate output filename.
+        final File destination = new File(chronicleDownloadFolder, getImageFileName(chronicleUrl) + ".html");
+
+        // Download chronicle page to output folder.
+        FileUtils.copyURLToFile(chronicleUrl, destination);
+
+        // Read downloaded chronicle with JSoup.
+        return Jsoup.parse(destination, "UTF-8", chronicleUrl.toString());
     }
 
     /**

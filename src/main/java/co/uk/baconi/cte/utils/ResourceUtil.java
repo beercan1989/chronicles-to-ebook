@@ -12,7 +12,7 @@ public final class ResourceUtil {
 
     public static String getString(final String resourceName) {
         try {
-            return FileUtils.readFileToString(getFile(resourceName));
+            return FileUtils.readFileToString(getFile(resourceName), "UTF-8");
         } catch (final IOException e) {
             return null;
         }

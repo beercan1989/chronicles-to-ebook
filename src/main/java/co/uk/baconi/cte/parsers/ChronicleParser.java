@@ -16,6 +16,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -24,6 +25,8 @@ import co.uk.baconi.annotations.VisibleForTesting;
 
 public final class ChronicleParser {
 
+    private static final String WIKI_URL = "http://wiki.eveonline.com/en/wiki/";
+    private static final String EMPTY = "";
     private static final Log LOG = LogFactory.getLog(ChronicleParser.class);
 
     private ChronicleParser() {
@@ -36,51 +39,70 @@ public final class ChronicleParser {
     public static void parseChroniclePage(final Document ebook, final URL chronicleUrl, final File imageOutputFolder,
             final File chronicleDownloadFolder) {
         try {
-            // Download chronicle page from the wiki.
             final Document downloadedChronicle = downloadChroniclePageFromWiki(chronicleUrl, chronicleDownloadFolder);
-
-            // Parse chronicle page
-            // - Get chronicle title.
-            // - Get all the chronicle paragraphs.
-            // - Get chronicle image.
-            final String chronicleTitle = getChronicleTitle(downloadedChronicle);
-            final Element chronicleImage = getChronicleImageDetails(downloadedChronicle);
-            final Elements chronicleParagraphs = getChronicleParagraphs(downloadedChronicle);
-
-            // Calculate chronicle index
-            final int chronicleIndex = calculateCurrentChronicleIndex(ebook);
-
-            // Download chronicle image
-            // - Get image URL
-            // - Download to image output folder
-            // - Update image element to point at image folder
-            if (chronicleImage != null) {
-                final File downloadedImage = downloadChronicleImage(downloadedChronicle, chronicleImage,
-                        imageOutputFolder);
-                updateChronicleImageElement(chronicleImage, downloadedImage, imageOutputFolder);
-            } else {
-                LOG.debug(downloadedChronicle.select("img"));
-            }
-
-            // Remove any empty paragraphs.
-            removeAnyEmptyParagraphs(chronicleParagraphs);
-
-            // Build chronicle entry
-            // - Add bookmark point.
-            // - Add chronicle title.
-            // - Add chronicle image.
-            // - Add chronicle paragraphs.
-            // - Add amazon page break.
-            buildChronicleBodyEntry(ebook, chronicleIndex, chronicleTitle, chronicleImage, chronicleParagraphs);
-
-            // Build TOC entry
-            // - Create TOC entry
-            // - Add to correct place in TOC area
-            // buildTableOfContentsEntry(ebook, chronicleIndex, chronicleTitle);
-
+            parseChroniclePage(ebook, downloadedChronicle, imageOutputFolder, chronicleDownloadFolder);
         } catch (final Throwable t) {
             LOG.error("Failed to parse chronicle page [" + chronicleUrl + "]", t);
         }
+    }
+
+    /**
+     * Downloads a chronicle page, parses it and add's it to the e-book document. Along with downloading the chronicle
+     * image and the chronicles source code to a file.
+     */
+    public static void parseChroniclePage(final Document ebook, final File chronicleFile, final File imageOutputFolder,
+            final File chronicleDownloadFolder) {
+        try {
+            final String baseUri = WIKI_URL + chronicleFile.getName().replace(".html", EMPTY);
+            final Document downloadedChronicle = Jsoup.parse(chronicleFile, "UTF-8", baseUri);
+            parseChroniclePage(ebook, downloadedChronicle, imageOutputFolder, chronicleDownloadFolder);
+        } catch (final Throwable t) {
+            LOG.error("Failed to parse chronicle page [" + chronicleFile + "]", t);
+        }
+    }
+
+    private static void parseChroniclePage(final Document ebook, final Document downloadedChronicle,
+            final File imageOutputFolder, final File chronicleDownloadFolder) throws IOException {
+        // Download chronicle page from the wiki.
+        // - This in done in the previous method call in this class.
+
+        // Parse chronicle page
+        // - Get chronicle title.
+        // - Get all the chronicle paragraphs.
+        // - Get chronicle image.
+        final String chronicleTitle = getChronicleTitle(downloadedChronicle);
+        final Element chronicleImage = getChronicleImageDetails(downloadedChronicle);
+        final Elements chronicleParagraphs = getChronicleParagraphs(downloadedChronicle);
+
+        // Calculate chronicle index
+        final int chronicleIndex = calculateCurrentChronicleIndex(ebook);
+
+        // Download chronicle image
+        // - Get image URL
+        // - Download to image output folder
+        // - Update image element to point at image folder
+        if (chronicleImage != null) {
+            final File downloadedImage = downloadChronicleImage(downloadedChronicle, chronicleImage, imageOutputFolder);
+            updateChronicleImageElement(chronicleImage, downloadedImage, imageOutputFolder);
+        } else {
+            LOG.debug(downloadedChronicle.select("img"));
+        }
+
+        // Remove any empty paragraphs.
+        removeAnyEmptyParagraphs(chronicleParagraphs);
+
+        // Build chronicle entry
+        // - Add bookmark point.
+        // - Add chronicle title.
+        // - Add chronicle image.
+        // - Add chronicle paragraphs.
+        // - Add amazon page break.
+        buildChronicleBodyEntry(ebook, chronicleIndex, chronicleTitle, chronicleImage, chronicleParagraphs);
+
+        // Build TOC entry
+        // - Create TOC entry
+        // - Add to correct place in TOC area
+        // buildTableOfContentsEntry(ebook, chronicleIndex, chronicleTitle);
     }
 
     /**
@@ -144,7 +166,11 @@ public final class ChronicleParser {
             final File imageOutputFolder) throws IOException {
         final URL imageUrl = getDownloadableImageUrl(downloadedChronicle, chronicleImage);
         final File imageDestination = new File(imageOutputFolder, getImageFileName(imageUrl));
-        FileUtils.copyURLToFile(imageUrl, imageDestination);
+
+        if (!imageDestination.exists() || imageDestination.length() < 100L) {
+            FileUtils.copyURLToFile(imageUrl, imageDestination);
+        }
+
         return imageDestination;
     }
 
@@ -181,7 +207,7 @@ public final class ChronicleParser {
      */
     @VisibleForTesting
     static String getChronicleTitle(final Document downloadedChronicle) {
-        return downloadedChronicle.select("h1.header").first().text().replaceAll("\\(Chronicle\\)", "");
+        return downloadedChronicle.select("h1.header").first().text().replaceAll("\\(Chronicle\\)", EMPTY).trim();
     }
 
 }

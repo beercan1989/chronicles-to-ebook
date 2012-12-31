@@ -1,17 +1,15 @@
 package co.uk.baconi.cte;
 
-import static co.uk.baconi.cte.parsers.ChronicleCollectionParser.parseChronicleCollections;
 import static co.uk.baconi.cte.parsers.ChronicleParser.parseChroniclePage;
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.buildBaseEbook;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jsoup.nodes.Document;
@@ -21,44 +19,31 @@ import co.uk.baconi.cte.utils.ResourceUtil;
 /**
  * @author JBacon
  */
-public final class Runner {
+public final class OfflineRunner {
 
-    private static Log LOG = LogFactory.getLog(Runner.class);
+    private static Log LOG = LogFactory.getLog(OfflineRunner.class);
 
-    public static final void main(final String[] programParams) throws MalformedURLException {
+    public static final void main(final String[] programParams) {
         if (programParams.length != 0) {
             System.err.println("This application does not support / require any parameters.");
         }
 
-        new Runner().run();
+        new OfflineRunner().run();
     }
-
-    private final List<URL> chronicleCollectionPages = new ArrayList<URL>();
 
     private final File outputfolder = new File("output/");
     private final File imageOutputFolder = new File(outputfolder, "images/");
     private final File chronicleDownloadFolder = new File(outputfolder, "chronicles-downloaded/");
     private final File ebookOutputFile = new File(outputfolder, "EveOnline-Chronicles.html");
 
-    public Runner() throws MalformedURLException {
-        final String baseUrl = "http://wiki.eveonline.com";
-        chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/Pre-Launch_(chronicles)"));
-        chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2003_(chronicles)"));
-        chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2004_(chronicles)"));
-        chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2005_(chronicles)"));
-        chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2006_(chronicles)"));
-        chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2007_(chronicles)"));
-        chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2008_(chronicles)"));
-        chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2009_(chronicles)"));
-        chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2010_(chronicles)"));
-        chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2011_(chronicles)"));
-        chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2012_(chronicles)"));
+    public OfflineRunner() {
     }
 
     public void run() {
         // 1) Find all chronicle url's and store them chronologically.
         LOG.debug("Finding all chronicle URLs.");
-        final List<URL> chronicleUrls = parseChronicleCollections(chronicleCollectionPages, chronicleDownloadFolder);
+        final Collection<File> chronicleFiles = FileUtils.listFiles(chronicleDownloadFolder, new RegexFileFilter(
+                "^(.*\\(Chronicle\\)\\.html?)"), DirectoryFileFilter.DIRECTORY);
 
         // 2) Create e-book from template.
         LOG.debug("Building base e-book from template.");
@@ -69,9 +54,9 @@ public final class Runner {
         // .... Should include adding TOC entry in e-book
         // .... Should include adding chronicle body into e-book.
         int index = 1;
-        for (final URL chronicleUrl : chronicleUrls) {
-            LOG.debug("Parsing chronicle [" + index++ + "], [" + chronicleUrl + "].");
-            parseChroniclePage(ebook, chronicleUrl, imageOutputFolder, chronicleDownloadFolder);
+        for (final File chroniclefile : chronicleFiles) {
+            LOG.debug("Parsing chronicle [" + index++ + "], [" + chroniclefile + "].");
+            parseChroniclePage(ebook, chroniclefile, imageOutputFolder, chronicleDownloadFolder);
         }
 
         // 4) Write e-book to file

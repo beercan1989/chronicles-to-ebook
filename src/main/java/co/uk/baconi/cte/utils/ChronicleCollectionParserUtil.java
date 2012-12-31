@@ -1,8 +1,5 @@
 package co.uk.baconi.cte.utils;
 
-import static co.uk.baconi.cte.utils.ChronicleParserUtil.downloadChroniclePageFromWiki;
-import static co.uk.baconi.cte.utils.ChronicleParserUtil.getBaseUrl;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -25,7 +22,7 @@ public final class ChronicleCollectionParserUtil {
         final List<URL> chroniclePages = new ArrayList<URL>();
 
         // Download the chronicle collection page.
-        final Document chronicleCollection = downloadChroniclePageFromWiki(chronicleCollectionPage,
+        final Document chronicleCollection = ChronicleParserUtil.downloadChroniclePageFromWiki(chronicleCollectionPage,
                 collectionDownloadFolder);
 
         // Find the chronicle list, that is in chronological order.
@@ -34,7 +31,7 @@ public final class ChronicleCollectionParserUtil {
 
         // Get all the anchor tags in the list.
         final Elements chronicleLinks = chronicleList.select("a");
-        final String baseUrl = getBaseUrl(chronicleCollection);
+        final String baseUrl = ChronicleParserUtil.getBaseUrl(chronicleCollection);
 
         // Populate the list of all the chronicle page URLs.
         for (final Element chronicleLink : chronicleLinks) {
