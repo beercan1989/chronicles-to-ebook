@@ -13,21 +13,21 @@ public final class EncodingUtil {
 
     private static final Map<String, String> replacementMap = new HashMap<String, String>();
     static {
-        final String singleQuote = "\u0027";
+        final String singleQuote = "'";
         replacementMap.put("\u2019", singleQuote);
         replacementMap.put("\u2018", singleQuote);
         replacementMap.put("\u201B", singleQuote);
         replacementMap.put("\u2039", singleQuote);
         replacementMap.put("\u203A", singleQuote);
 
-        final String doubleQuote = "\\u0022";
+        final String doubleQuote = "\"";
         replacementMap.put("\u201C", doubleQuote);
         replacementMap.put("\u201F", doubleQuote);
         replacementMap.put("\u201D", doubleQuote);
         replacementMap.put("\u00AB", doubleQuote);
         replacementMap.put("\u00BB", doubleQuote);
 
-        final String hyphen = "\u002D";
+        final String hyphen = "-";
         replacementMap.put("\u2010", hyphen);
         replacementMap.put("\u2011", hyphen);
         replacementMap.put("\u2012", hyphen);
