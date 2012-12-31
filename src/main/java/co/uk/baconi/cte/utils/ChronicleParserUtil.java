@@ -64,7 +64,14 @@ public final class ChronicleParserUtil {
      * Removes all the HTML tags inside of the element.
      */
     public static Element cleanInnerHtml(final Element element) {
-        return element.text(element.text());
+        return element == null ? null : element.text(clean(element.text()));
+    }
+
+    /**
+     * Trims any white space and converts into Latin-1 from UTF-8.
+     */
+    public static String clean(final String string) {
+        return string == null ? null : EncodingUtil.convertToKindleSafe(string).trim();
     }
 
     /**

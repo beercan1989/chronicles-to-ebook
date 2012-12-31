@@ -4,43 +4,32 @@ import static co.uk.baconi.cte.parsers.ChronicleCollectionParser.parseChronicleC
 import static co.uk.baconi.cte.parsers.ChronicleParser.parseChroniclePage;
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.buildBaseEbook;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jsoup.nodes.Document;
 
-import co.uk.baconi.cte.utils.ResourceUtil;
-
 /**
  * @author JBacon
  */
-public final class Runner {
-
-    private static Log LOG = LogFactory.getLog(Runner.class);
+public final class LiveRunner extends AbstractRunner {
 
     public static final void main(final String[] programParams) throws MalformedURLException {
+        final Log logger = LogFactory.getLog(LiveRunner.class);
+        logger.debug("Starting");
         if (programParams.length != 0) {
             System.err.println("This application does not support / require any parameters.");
         }
 
-        new Runner().run();
+        new LiveRunner().run();
+        logger.debug("Finished");
     }
 
-    private final List<URL> chronicleCollectionPages = new ArrayList<URL>();
-
-    private final File outputfolder = new File("output/");
-    private final File imageOutputFolder = new File(outputfolder, "images/");
-    private final File chronicleDownloadFolder = new File(outputfolder, "chronicles-downloaded/");
-    private final File ebookOutputFile = new File(outputfolder, "EveOnline-Chronicles.html");
-
-    public Runner() throws MalformedURLException {
+    public LiveRunner() throws MalformedURLException {
+        super();
         final String baseUrl = "http://wiki.eveonline.com";
         chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/Pre-Launch_(chronicles)"));
         chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2003_(chronicles)"));
@@ -55,6 +44,7 @@ public final class Runner {
         chronicleCollectionPages.add(new URL(baseUrl + "/en/wiki/2012_(chronicles)"));
     }
 
+    @Override
     public void run() {
         // 1) Find all chronicle url's and store them chronologically.
         LOG.debug("Finding all chronicle URLs.");
@@ -83,22 +73,5 @@ public final class Runner {
         saveCoverImageToOutputFolder();
 
         // # Optional - add in the ability to run amazon's tool with this application.
-    }
-
-    private void saveEbooktoOutputFolder(final Document ebook) {
-        try {
-            FileUtils.writeStringToFile(ebookOutputFile, ebook.toString(), "UTF-8");
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void saveCoverImageToOutputFolder() {
-        final File coverImage = ResourceUtil.getFile("/images/EveOnlineChroniclesCover.jpg");
-        try {
-            FileUtils.copyFileToDirectory(coverImage, imageOutputFolder);
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
     }
 }

@@ -1,6 +1,7 @@
 package co.uk.baconi.cte.parsers;
 
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.appendChildren;
+import static co.uk.baconi.cte.utils.ChronicleParserUtil.clean;
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.cleanInnerHtml;
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.downloadChroniclePageFromWiki;
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.getDownloadableImageUrl;
@@ -22,6 +23,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import co.uk.baconi.annotations.VisibleForTesting;
+import co.uk.baconi.cte.utils.EncodingUtil.Encoding;
 
 public final class ChronicleParser {
 
@@ -54,7 +56,7 @@ public final class ChronicleParser {
             final File chronicleDownloadFolder) {
         try {
             final String baseUri = WIKI_URL + chronicleFile.getName().replace(".html", EMPTY);
-            final Document downloadedChronicle = Jsoup.parse(chronicleFile, "UTF-8", baseUri);
+            final Document downloadedChronicle = Jsoup.parse(chronicleFile, Encoding.UTF8.getName(), baseUri);
             parseChroniclePage(ebook, downloadedChronicle, imageOutputFolder, chronicleDownloadFolder);
         } catch (final Throwable t) {
             LOG.error("Failed to parse chronicle page [" + chronicleFile + "]", t);
@@ -207,7 +209,7 @@ public final class ChronicleParser {
      */
     @VisibleForTesting
     static String getChronicleTitle(final Document downloadedChronicle) {
-        return downloadedChronicle.select("h1.header").first().text().replaceAll("\\(Chronicle\\)", EMPTY).trim();
+        return clean(downloadedChronicle.select("h1.header").first().text().replaceAll("\\(Chronicle\\)", EMPTY));
     }
 
 }

@@ -4,7 +4,6 @@ import static co.uk.baconi.cte.parsers.ChronicleParser.parseChroniclePage;
 import static co.uk.baconi.cte.utils.ChronicleParserUtil.buildBaseEbook;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 
 import org.apache.commons.io.FileUtils;
@@ -14,31 +13,30 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jsoup.nodes.Document;
 
-import co.uk.baconi.cte.utils.ResourceUtil;
-
 /**
+ * Runs the e-book parser in a form of offline mode, but currently does not respect the chronological order they were
+ * written.
+ * 
  * @author JBacon
  */
-public final class OfflineRunner {
-
-    private static Log LOG = LogFactory.getLog(OfflineRunner.class);
+public final class OfflineRunner extends AbstractRunner {
 
     public static final void main(final String[] programParams) {
+        final Log logger = LogFactory.getLog(OfflineRunner.class);
+
+        logger.debug("Starting");
         if (programParams.length != 0) {
             System.err.println("This application does not support / require any parameters.");
         }
 
         new OfflineRunner().run();
+        logger.debug("Finished");
     }
 
-    private final File outputfolder = new File("output/");
-    private final File imageOutputFolder = new File(outputfolder, "images/");
-    private final File chronicleDownloadFolder = new File(outputfolder, "chronicles-downloaded/");
-    private final File ebookOutputFile = new File(outputfolder, "EveOnline-Chronicles.html");
-
-    public OfflineRunner() {
+    private OfflineRunner() {
     }
 
+    @Override
     public void run() {
         // 1) Find all chronicle url's and store them chronologically.
         LOG.debug("Finding all chronicle URLs.");
@@ -68,22 +66,5 @@ public final class OfflineRunner {
         saveCoverImageToOutputFolder();
 
         // # Optional - add in the ability to run amazon's tool with this application.
-    }
-
-    private void saveEbooktoOutputFolder(final Document ebook) {
-        try {
-            FileUtils.writeStringToFile(ebookOutputFile, ebook.toString(), "UTF-8");
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void saveCoverImageToOutputFolder() {
-        final File coverImage = ResourceUtil.getFile("/images/EveOnlineChroniclesCover.jpg");
-        try {
-            FileUtils.copyFileToDirectory(coverImage, imageOutputFolder);
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
     }
 }

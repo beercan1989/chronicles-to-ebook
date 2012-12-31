@@ -70,7 +70,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
-							<mainClass>com.jbacon.cte.Runner</mainClass>
+							<mainClass>com.jbacon.cte.LiveRunner</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
