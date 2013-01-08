@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -26,12 +27,12 @@ public class ChronicleCollectionParserTest extends AbstractChronicleTest {
         chronicleCollections.add(new URL("http://wiki.eveonline.com/en/wiki/Pre-Launch_(chronicles)"));
         chronicleCollections.add(new URL("http://wiki.eveonline.com/en/wiki/2003_(chronicles)"));
 
-        final List<URL> results = parseChronicleCollections(chronicleCollections, TEST_OUTPUT_FOLDER);
+        final Set<URL> results = parseChronicleCollections(chronicleCollections, TEST_OUTPUT_FOLDER);
 
         assertThat(results, is(not(nullValue())));
         assertThat(results, is(not(empty())));
         assertThat(results, hasSize(65 + 8));
-        assertThat(results.get(0).toString(), containsString("Fedo_(Chronicle)"));
+        assertThat(results.toArray(new URL[] {})[0].toString(), containsString("Fedo_(Chronicle)"));
     }
 
 }

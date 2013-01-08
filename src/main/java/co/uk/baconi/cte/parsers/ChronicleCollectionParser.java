@@ -4,8 +4,9 @@ import static co.uk.baconi.cte.utils.ChronicleCollectionParserUtil.getChronicleP
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,9 +21,9 @@ public final class ChronicleCollectionParser {
     /**
      * Takes a list of all the chronicle collections and returns a list of all chronicles found, in chronological order.
      */
-    public static List<URL> parseChronicleCollections(final List<URL> chronicleCollections,
+    public static Set<URL> parseChronicleCollections(final List<URL> chronicleCollections,
             final File collectionDownloadFolder) {
-        final List<URL> chroniclePages = new ArrayList<URL>();
+        final Set<URL> chroniclePages = new LinkedHashSet<URL>();
 
         for (final URL chronicleCollection : chronicleCollections) {
             try {

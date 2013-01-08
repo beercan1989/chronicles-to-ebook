@@ -6,7 +6,7 @@ import static co.uk.baconi.cte.utils.ChronicleParserUtil.buildBaseEbook;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,7 +48,7 @@ public final class LiveRunner extends AbstractRunner {
     public void run() {
         // 1) Find all chronicle url's and store them chronologically.
         LOG.debug("Finding all chronicle URLs.");
-        final List<URL> chronicleUrls = parseChronicleCollections(chronicleCollectionPages, chronicleDownloadFolder);
+        final Set<URL> chronicleUrls = parseChronicleCollections(chronicleCollectionPages, chronicleDownloadFolder);
 
         // 2) Create e-book from template.
         LOG.debug("Building base e-book from template.");
