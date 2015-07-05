@@ -1,0 +1,1 @@
+The aim of the project is to create a script to download and covert the Eve Online Chronicles into an e-book form (initially it will be geared at the Kindle).
